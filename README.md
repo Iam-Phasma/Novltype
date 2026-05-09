@@ -2,8 +2,6 @@
 
 A minimal, keyboard-first typing trainer built with vanilla HTML, CSS, and JavaScript. No frameworks, no build step.
 
-![Novltype dark mode screenshot](https://raw.githubusercontent.com/Iam-Phasma/Novltype/main/preview.png)
-
 ---
 
 ## Features
