@@ -17,6 +17,11 @@
     <div class="orb orb-2"></div>
   </div>
 
+  <div class="mobile-block" id="mobile-block">
+    <span class="wordmark">Novltype<span class="dot">.</span></span>
+    <p class="mobile-block-text">Built for the full keyboard experience.<br>Open on a desktop to start typing.</p>
+  </div>
+
   <div id="app">
 
     <!-- Top bar: wordmark + toolbar -->
@@ -27,28 +32,28 @@
 
         <!-- Key row practice -->
         <div class="tool-group" id="tg-row">
-          <button class="tool-btn active" data-val="all">all</button>
-          <button class="tool-btn" data-val="top">top row</button>
-          <button class="tool-btn" data-val="home">home row</button>
-          <button class="tool-btn" data-val="bottom">bottom row</button>
+          <button class="tool-btn active" data-val="all" data-tip="Practice words from all keyboard rows">all</button>
+          <button class="tool-btn" data-val="top" data-tip="Words using mostly top-row keys (Q W E R T Y…)">top row</button>
+          <button class="tool-btn" data-val="home" data-tip="Words using mostly home-row keys (A S D F G H…)">home row</button>
+          <button class="tool-btn" data-val="bottom" data-tip="Words using mostly bottom-row keys (Z X C V B…)">bottom row</button>
         </div>
 
         <div class="tool-sep"></div>
 
         <!-- Word length -->
         <div class="tool-group" id="tg-len">
-          <button class="tool-btn active" data-val="all">all</button>
-          <button class="tool-btn" data-val="short">short</button>
-          <button class="tool-btn" data-val="medium">medium</button>
-          <button class="tool-btn" data-val="long">long</button>
+          <button class="tool-btn active" data-val="all" data-tip="Mix of all word lengths">all</button>
+          <button class="tool-btn" data-val="short" data-tip="Short words · 3–4 letters">short</button>
+          <button class="tool-btn" data-val="medium" data-tip="Medium words · 5–7 letters">medium</button>
+          <button class="tool-btn" data-val="long" data-tip="Long words · 8–14 letters">long</button>
         </div>
 
         <div class="tool-sep"></div>
 
         <!-- Timed mode -->
         <div class="tool-group" id="tg-time">
-          <button class="tool-btn active" data-val="off">free</button>
-          <button class="tool-btn" data-val="1min">1 min</button>
+          <button class="tool-btn active" data-val="off" data-tip="Untimed — type at your own pace">free</button>
+          <button class="tool-btn" data-val="1min" data-tip="Timed mode — 60 seconds">1 min</button>
         </div>
 
       </nav>
@@ -104,30 +109,31 @@
       <div class="spanel-row">
         <span class="spanel-label">display</span>
         <div class="spanel-group" id="sp-display">
-          <button class="spanel-btn active" data-val="word">1 word</button>
-          <button class="spanel-btn" data-val="paragraph">paragraph</button>
-          <button class="spanel-btn" data-val="rise">rise</button>
+          <button class="spanel-btn active" data-val="word" data-tip="One word at a time">1 word</button>
+          <button class="spanel-btn" data-val="paragraph" data-tip="Full paragraph — flip page every 30 words">paragraph</button>
+          <button class="spanel-btn" data-val="rise" data-tip="Words rise up as you type through them">rise</button>
         </div>
       </div>
       <div class="spanel-row">
         <span class="spanel-label">mode</span>
         <div class="spanel-group" id="sp-jump">
-          <button class="spanel-btn active" data-val="off">type</button>
-          <button class="spanel-btn" data-val="on">jump</button>
+          <button class="spanel-btn active" data-val="off" data-tip="Submit words with Space">type</button>
+          <button class="spanel-btn" data-val="on" data-tip="Auto-advance when the full word is typed">jump</button>
         </div>
       </div>
       <div class="spanel-row">
         <span class="spanel-label">sound</span>
-        <button class="spanel-toggle active" id="btn-sound">on</button>
+        <button class="spanel-toggle active" id="btn-sound" data-tip="Toggle keystroke sounds">on</button>
       </div>
       <div class="spanel-row">
         <span class="spanel-label">theme</span>
-        <button class="spanel-toggle" id="btn-theme">light</button>
+        <button class="spanel-toggle" id="btn-theme" data-tip="Switch between dark and light mode">light</button>
       </div>
     </div>
 
   </div>
 
+  <div class="tip" id="tip"></div>
   <script src="script.js"></script>
 </body>
 </html>

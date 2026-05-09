@@ -520,9 +520,9 @@ function endGame() {
   const total   = S.correct + S.wrong;
   const acc     = total ? Math.round((S.correct / total) * 100) : 0;
   $hint.innerHTML =
-    `<span class="hint-key">${wpm} wpm</span>` +
+    `<span class="hint-stat">${wpm} wpm</span>` +
     `<span class="hint-sep">/</span>` +
-    `<span class="hint-key">${acc}%</span>` +
+    `<span class="hint-stat">${acc}%</span>` +
     `<br><span class="hint-sub">press <span class="hint-key">enter</span> to play again</span>`;
   $hint.classList.remove('hidden');
 }
@@ -550,20 +550,25 @@ function unlockToolbar() {
 
 function start() {
   if (S.started) return;
-  if (S.ended) reset();
-  S.started   = true;
-  S.startTime = performance.now();
-  S.timedEnd  = F.timedMode === '1min' ? performance.now() + 60000 : null;
-  S.timerID   = setInterval(updateStats, 200);
-  if (F.timedMode === '1min') lockToolbar();
-  $bgOrbs.classList.add('hide');
-  resetCtx();
-  $hint.classList.add('hidden');
-  $display.style.display = '';
-  $escHint.classList.add('visible');
-  resetIdleTimer();
-  $typer.focus();
-  loadNextWord();
+  // Animate hint out, then launch
+  $hint.classList.add('exiting');
+  setTimeout(() => {
+    $hint.classList.remove('exiting');
+    if (S.ended) reset(); // resets state; reset() restores hint but we'll immediately hide it
+    S.started   = true;
+    S.startTime = performance.now();
+    S.timedEnd  = F.timedMode === '1min' ? performance.now() + 60000 : null;
+    S.timerID   = setInterval(updateStats, 200);
+    if (F.timedMode === '1min') lockToolbar();
+    $bgOrbs.classList.add('hide');
+    resetCtx();
+    $hint.classList.add('hidden');
+    $display.style.display = '';
+    $escHint.classList.add('visible');
+    resetIdleTimer();
+    $typer.focus();
+    loadNextWord();
+  }, 280);
 }
 
 function skipWord() {
@@ -612,7 +617,7 @@ const IGNORE_KEYS = ['Shift','Control','Alt','Meta','CapsLock','Tab'];
 document.addEventListener('keydown', e => {
   if (IGNORE_KEYS.includes(e.key)) return;
 
-  soundFor(e.key, 'press');
+  if (!e.repeat) soundFor(e.key, 'press');
 
   if (e.key === 'Escape' && S.started) {
     e.preventDefault();
@@ -621,8 +626,16 @@ document.addEventListener('keydown', e => {
   }
 
   if (!S.started) {
-    // Enter starts or restarts the game
-    if (e.key === 'Enter') { e.preventDefault(); start(); }
+    // Animate the "enter" hint-key on press (game starts on release)
+    if (e.key === 'Enter' && !e.repeat) {
+      e.preventDefault();
+      const enterEl = $hint.querySelector('.hint-key');
+      if (enterEl) {
+        enterEl.classList.remove('pressed');
+        void enterEl.offsetWidth; // reflow to restart
+        enterEl.classList.add('pressed');
+      }
+    }
     return;
   }
 });
@@ -630,6 +643,9 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => {
   if (IGNORE_KEYS.includes(e.key)) return;
   soundFor(e.key, 'release');
+  if (!S.started && e.key === 'Enter') {
+    start();
+  }
 });
 
 $typer.addEventListener('input', () => {
@@ -674,10 +690,60 @@ function bindGroup(groupId, stateKey) {
       document.querySelectorAll(`#${groupId} .tool-btn`).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       F[stateKey] = btn.dataset.val;
+      savePrefs();
       rebuildQueue();
       if (S.started) loadNextWord();
     });
   });
+}
+
+// ── Preferences persistence ───────────────────────────────────────────
+const PREF_KEY = 'novltype_prefs';
+
+function savePrefs() {
+  try { localStorage.setItem(PREF_KEY, JSON.stringify(F)); } catch (_) {}
+}
+
+function loadPrefs() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(PREF_KEY)); } catch (_) {}
+  if (!saved) return;
+
+  // Merge saved into F
+  const keys = ['row','len','timedMode','display','jump','sound','light'];
+  keys.forEach(k => { if (k in saved) F[k] = saved[k]; });
+
+  // Sync toolbar: row, len
+  ['tg-row','tg-len'].forEach(id => {
+    const key = id === 'tg-row' ? 'row' : 'len';
+    document.querySelectorAll(`#${id} .tool-btn`).forEach(b => {
+      b.classList.toggle('active', b.dataset.val === F[key]);
+    });
+  });
+
+  // Sync timed mode
+  document.querySelectorAll('#tg-time .tool-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === F.timedMode);
+  });
+
+  // Sync display
+  document.querySelectorAll('#sp-display .spanel-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === F.display);
+  });
+
+  // Sync jump
+  document.querySelectorAll('#sp-jump .spanel-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === (F.jump ? 'on' : 'type'));
+  });
+
+  // Sync sound
+  const $bs = document.getElementById('btn-sound');
+  if ($bs) { $bs.textContent = F.sound ? 'on' : 'off'; $bs.classList.toggle('active', F.sound); }
+
+  // Sync theme
+  document.body.classList.toggle('light', F.light);
+  const $bt = document.getElementById('btn-theme');
+  if ($bt) { $bt.textContent = F.light ? 'dark' : 'light'; $bt.classList.toggle('active', F.light); }
 }
 
 bindGroup('tg-row', 'row');
@@ -689,6 +755,7 @@ document.querySelectorAll('#tg-time .tool-btn').forEach(btn => {
     document.querySelectorAll('#tg-time .tool-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     F.timedMode = btn.dataset.val;
+    savePrefs();
     if (S.started || S.ended) { reset(); }
   });
 });
@@ -713,6 +780,7 @@ document.querySelectorAll('#sp-display .spanel-btn').forEach(btn => {
     document.querySelectorAll('#sp-display .spanel-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     F.display = btn.dataset.val;
+    savePrefs();
     if (S.started || S.ended) { reset(); }
   });
 });
@@ -723,12 +791,14 @@ document.querySelectorAll('#sp-jump .spanel-btn').forEach(btn => {
     document.querySelectorAll('#sp-jump .spanel-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     F.jump = btn.dataset.val === 'on';
+    savePrefs();
   });
 });
 
 // Sound toggle
 $btnSound.addEventListener('click', () => {
   F.sound = !F.sound;
+  savePrefs();
   $btnSound.textContent = F.sound ? 'on' : 'off';
   $btnSound.classList.toggle('active', F.sound);
 });
@@ -736,11 +806,41 @@ $btnSound.addEventListener('click', () => {
 // Theme toggle
 $btnTheme.addEventListener('click', () => {
   F.light = !F.light;
+  savePrefs();
   document.body.classList.toggle('light', F.light);
   $btnTheme.textContent = F.light ? 'dark' : 'light';
   $btnTheme.classList.toggle('active', F.light);
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────
+loadPrefs();
 // Word display stays empty until Enter is pressed
 $display.style.display = 'none';
+
+// ── Tooltip ───────────────────────────────────────────────────────────
+const $tip = document.getElementById('tip');
+let _tipTimer = null;
+
+document.addEventListener('mouseover', e => {
+  const target = e.target.closest('[data-tip]');
+  if (!target) return;
+  clearTimeout(_tipTimer);
+  $tip.textContent = target.dataset.tip;
+  _tipTimer = setTimeout(() => {
+    const r = target.getBoundingClientRect();
+    const tw = $tip.offsetWidth;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    const top = r.top - $tip.offsetHeight - 8;
+    $tip.style.left = left + 'px';
+    $tip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
+    $tip.classList.add('visible');
+  }, 400);
+});
+
+document.addEventListener('mouseout', e => {
+  const target = e.target.closest('[data-tip]');
+  if (!target) return;
+  clearTimeout(_tipTimer);
+  $tip.classList.remove('visible');
+});
