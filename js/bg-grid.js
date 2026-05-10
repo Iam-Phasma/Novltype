@@ -78,9 +78,9 @@
     isLight = document.body.classList.contains("light");
 
     const lineColor = isLight ? "rgba(0,0,0,0.045)" : "rgba(255,255,255,0.045)";
-    const blockR = isLight ? 0 : 107;
-    const blockG = isLight ? 0 : 107;
-    const blockB = isLight ? 0 : 255;
+    const blockR = 107;
+    const blockG = 107;
+    const blockB = 255;
 
     function cellVisible(c, r) {
       if (c < 0 || r < 0 || c >= cols || r >= rows) return true;

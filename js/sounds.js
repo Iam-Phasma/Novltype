@@ -38,6 +38,28 @@ const SND = {
 const _actx = new (window.AudioContext || window.webkitAudioContext)();
 const _decodeCache = new Map();
 let _duckKeysUntil = 0;
+const KEY_GAIN = {
+  special: 3.0,
+  pressGeneric: 3.6,
+  releaseGeneric: 3.2,
+};
+const KEY_STACK = {
+  layers: 2,
+  delayMs: 7,
+  secondLayerMul: 0.7,
+};
+
+function isKeysSoundOn() {
+  if (typeof F.soundKeys === "boolean") return F.soundKeys;
+  if (typeof F.sound === "boolean") return F.sound;
+  return true;
+}
+
+function isFxSoundOn() {
+  if (typeof F.soundFx === "boolean") return F.soundFx;
+  if (typeof F.sound === "boolean") return F.sound;
+  return true;
+}
 
 function ensureAudioUnlocked() {
   if (_actx.state === "running") return;
@@ -48,8 +70,10 @@ function ensureAudioUnlocked() {
   document.addEventListener(evt, ensureAudioUnlocked, { passive: true });
 });
 
-function playWithGain(audio, gain) {
-  if (!audio || !F.sound) return;
+function playWithGain(audio, gain, channel = "keys") {
+  if (!audio) return;
+  if (channel === "keys" && !isKeysSoundOn()) return;
+  if (channel === "fx" && !isFxSoundOn()) return;
   if (_actx.state !== "running") {
     ensureAudioUnlocked();
     const c = audio.cloneNode();
@@ -88,11 +112,13 @@ function playWithGain(audio, gain) {
     });
 }
 
-function play(audio, gain = 1) {
-  if (!audio || !F.sound) return;
+function play(audio, gain = 1, channel = "keys") {
+  if (!audio) return;
+  if (channel === "keys" && !isKeysSoundOn()) return;
+  if (channel === "fx" && !isFxSoundOn()) return;
   ensureAudioUnlocked();
   if (gain !== 1) {
-    playWithGain(audio, gain);
+    playWithGain(audio, gain, channel);
     return;
   }
   const c = audio.cloneNode();
@@ -100,28 +126,62 @@ function play(audio, gain = 1) {
   c.play().catch(() => {});
 }
 
+function playHtml(audio, volume = 1, channel = "fx") {
+  if (!audio) return;
+  if (channel === "keys" && !isKeysSoundOn()) return;
+  if (channel === "fx" && !isFxSoundOn()) return;
+  const c = audio.cloneNode();
+  c.volume = Math.max(0, Math.min(1, volume));
+  c.play().catch(() => {});
+}
+
 function playFeedback(audio, gain = 2.2) {
-  if (!audio || !F.sound) return;
-  _duckKeysUntil = performance.now() + 140;
-  setTimeout(() => playWithGain(audio, gain), 24);
+  if (!audio || !isFxSoundOn()) return;
+  _duckKeysUntil = performance.now() + 180;
+  ensureAudioUnlocked();
+
+  // Honor gain exactly, including values below 1. For gain > 1, layer clones
+  // in 1.0 chunks plus a final remainder to preserve loudness scaling.
+  let remaining = Math.max(0, gain);
+  if (remaining <= 0) return;
+  while (remaining > 0.001) {
+    playHtml(audio, Math.min(1, remaining), "fx");
+    remaining -= 1;
+  }
+}
+
+function playKey(audio, gain) {
+  if (!isKeysSoundOn()) return;
+  playWithGain(audio, gain, "keys");
+  if (KEY_STACK.layers > 1) {
+    setTimeout(
+      () => playWithGain(audio, gain * KEY_STACK.secondLayerMul, "keys"),
+      KEY_STACK.delayMs,
+    );
+  }
 }
 
 function soundFor(key, phase) {
   const k = key.toLowerCase();
   const duck = performance.now() < _duckKeysUntil ? 0.35 : 1;
   if (phase === "press") {
-    if (k === " ") playWithGain(SND.press.space, duck);
-    else if (k === "enter") playWithGain(SND.press.enter, duck);
-    else if (k === "backspace") playWithGain(SND.press.backspace, duck);
+    if (k === " ") playKey(SND.press.space, KEY_GAIN.special * duck);
+    else if (k === "enter") playKey(SND.press.enter, KEY_GAIN.special * duck);
+    else if (k === "backspace")
+      playKey(SND.press.backspace, KEY_GAIN.special * duck);
     else {
-      play(SND.press.generic[genericIdx % GENERIC_N], 1.6 * duck);
+      playKey(
+        SND.press.generic[genericIdx % GENERIC_N],
+        KEY_GAIN.pressGeneric * duck,
+      );
       genericIdx++;
     }
   } else {
-    if (k === " ") playWithGain(SND.release.space, duck);
-    else if (k === "enter") playWithGain(SND.release.enter, duck);
-    else if (k === "backspace") playWithGain(SND.release.backspace, duck);
-    else play(SND.release.generic, 1.6 * duck);
+    if (k === " ") playKey(SND.release.space, KEY_GAIN.special * duck);
+    else if (k === "enter") playKey(SND.release.enter, KEY_GAIN.special * duck);
+    else if (k === "backspace")
+      playKey(SND.release.backspace, KEY_GAIN.special * duck);
+    else playKey(SND.release.generic, KEY_GAIN.releaseGeneric * duck);
   }
 }
 

@@ -10,7 +10,8 @@ const F = {
   timedMode: "off", // 'off' | '1min'
   display: "word", // 'word' | 'paragraph' | 'rise'
   jump: false, // auto-advance on complete without space
-  sound: true,
+  soundKeys: true,
+  soundFx: true,
   light: false,
 };
 

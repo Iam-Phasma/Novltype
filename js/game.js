@@ -199,7 +199,7 @@ function submitWord() {
   const correct = S.typed === S.currentWord;
   if (correct) {
     S.correct++;
-    playFeedback(SND.feedback.correct, 2.1);
+    playFeedback(SND.feedback.correct, 0.5);
   } else {
     S.wrong++;
   }

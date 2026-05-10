@@ -790,6 +790,8 @@ body.light .tip {
 .stats-bar {
   position: absolute;
   bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 48px;
   align-items: flex-end;

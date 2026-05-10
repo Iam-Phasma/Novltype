@@ -12,6 +12,7 @@ const $acc = document.getElementById("stat-acc");
 const $time = document.getElementById("stat-time");
 const $words = document.getElementById("stat-words");
 const $btnSound = document.getElementById("btn-sound");
+const $btnSoundFx = document.getElementById("btn-sound-fx");
 const $btnSoundTest = document.getElementById("btn-sound-test");
 const $btnTheme = document.getElementById("btn-theme");
 const $btnSettings = document.getElementById("btn-settings");
@@ -213,12 +214,22 @@ document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
 });
 
 $btnSound.addEventListener("click", () => {
-  F.sound = !F.sound;
+  F.soundKeys = !F.soundKeys;
   savePrefs();
-  $btnSound.textContent = F.sound ? "on" : "off";
-  $btnSound.classList.toggle("active", F.sound);
-  if (F.sound) play(SND.feedback.correct, 1);
+  $btnSound.textContent = F.soundKeys ? "on" : "off";
+  $btnSound.classList.toggle("active", F.soundKeys);
+  if (F.soundKeys) play(SND.press.enter, 1.4);
 });
+
+if ($btnSoundFx) {
+  $btnSoundFx.addEventListener("click", () => {
+    F.soundFx = !F.soundFx;
+    savePrefs();
+    $btnSoundFx.textContent = F.soundFx ? "on" : "off";
+    $btnSoundFx.classList.toggle("active", F.soundFx);
+    if (F.soundFx) playFeedback(SND.feedback.correct, 0.6);
+  });
+}
 
 function showQuickTip(target, text, ms = 1800) {
   const r = target.getBoundingClientRect();
@@ -235,6 +246,10 @@ function showQuickTip(target, text, ms = 1800) {
 
 if ($btnSoundTest) {
   $btnSoundTest.addEventListener("click", async () => {
+    if (!F.soundFx) {
+      showQuickTip($btnSoundTest, "effects are off", 1600);
+      return;
+    }
     const testFn = window.testSoundPlayback;
     if (typeof testFn !== "function") {
       showQuickTip($btnSoundTest, "sound test unavailable", 2200);
@@ -280,11 +295,17 @@ function loadPrefs() {
   } catch (_) {}
   if (!saved) return;
 
-  ["row", "len", "timedMode", "display", "jump", "sound", "light"].forEach(
-    (k) => {
-      if (k in saved) F[k] = saved[k];
-    },
-  );
+  ["row", "len", "timedMode", "display", "jump", "light"].forEach((k) => {
+    if (k in saved) F[k] = saved[k];
+  });
+
+  // Backward compatibility: migrate legacy unified sound preference.
+  if ("soundKeys" in saved) F.soundKeys = saved.soundKeys;
+  if ("soundFx" in saved) F.soundFx = saved.soundFx;
+  if (!("soundKeys" in saved) && !("soundFx" in saved) && "sound" in saved) {
+    F.soundKeys = saved.sound;
+    F.soundFx = saved.sound;
+  }
 
   ["tg-row", "tg-len"].forEach((id) => {
     const key = id === "tg-row" ? "row" : "len";
@@ -303,8 +324,13 @@ function loadPrefs() {
   });
 
   if ($btnSound) {
-    $btnSound.textContent = F.sound ? "on" : "off";
-    $btnSound.classList.toggle("active", F.sound);
+    $btnSound.textContent = F.soundKeys ? "on" : "off";
+    $btnSound.classList.toggle("active", F.soundKeys);
+  }
+
+  if ($btnSoundFx) {
+    $btnSoundFx.textContent = F.soundFx ? "on" : "off";
+    $btnSoundFx.classList.toggle("active", F.soundFx);
   }
 
   document.body.classList.toggle("light", F.light);
