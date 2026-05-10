@@ -1,82 +1,406 @@
-'use strict';
+"use strict";
 
 // ══════════════════════════════════════════════════════════════════════
 //  WORD LIST
 // ══════════════════════════════════════════════════════════════════════
 
 const WORDS = [
-  'the','be','to','of','and','a','in','that','have','it','for','not','on','with',
-  'he','as','you','do','at','this','but','his','by','from','they','we','say','her',
-  'she','or','an','will','my','one','all','would','there','their','what','so','up',
-  'out','if','about','who','get','which','go','me','when','make','can','like','time',
-  'no','just','him','know','take','people','into','year','your','good','some','could',
-  'them','see','other','than','then','now','look','only','come','its','over','think',
-  'also','back','after','use','two','how','our','work','first','well','way','even',
-  'new','want','because','any','these','give','day','most','us','great','between',
-  'need','large','often','hand','high','place','hold','turn','during','without',
-  'before','around','school','still','learn','plant','cover','food','sun','four',
-  'state','keep','never','last','let','thought','city','tree','cross','farm','hard',
-  'start','might','story','saw','far','sea','draw','left','late','run','while',
-  'press','close','night','real','life','few','open','seem','together','next','white',
-  'children','begin','got','walk','example','ease','paper','group','always','music',
-  'those','both','mark','often','letter','until','mile','river','car','feet','care',
-  'second','book','carry','took','science','eat','room','friend','began','idea',
-  'fish','mountain','stop','once','base','hear','horse','cut','sure','watch','color',
-  'face','wood','main','enough','plain','girl','usual','young','ready','above','ever',
-  'red','list','though','feel','talk','bird','soon','body','dog','family','direct',
-  'pose','leave','song','measure','door','product','black','short','numeral','class',
-  'wind','question','happen','complete','ship','area','half','rock','order','fire',
-  'south','piece','told','knew','pass','since','top','whole','king','space','heard',
-  'best','hour','better','true','hundred','five','remember','step','early','hold',
-  'west','ground','interest','reach','fast','verb','sing','listen','six','table',
-  'travel','less','morning','ten','simple','several','vowel','toward','war','lay',
-  'against','pattern','slow','center','love','person','money','serve','appear',
-  'road','map','rain','rule','govern','pull','cold','notice','voice','power','town',
-  'fine','drive','lead','cry','dark','machine','note','wait','plan','figure','star',
-  'box','noun','field','rest','correct','able','pound','done','beauty','stood',
-  'contain','front','teach','week','final','gave','green','oh','quick','develop',
-  'ocean','warm','free','minute','strong','special','mind','behind','clear','tail',
-  'produce','fact','street','inch','multiply','nothing','course','stay','wheel','full',
+  "the",
+  "be",
+  "to",
+  "of",
+  "and",
+  "a",
+  "in",
+  "that",
+  "have",
+  "it",
+  "for",
+  "not",
+  "on",
+  "with",
+  "he",
+  "as",
+  "you",
+  "do",
+  "at",
+  "this",
+  "but",
+  "his",
+  "by",
+  "from",
+  "they",
+  "we",
+  "say",
+  "her",
+  "she",
+  "or",
+  "an",
+  "will",
+  "my",
+  "one",
+  "all",
+  "would",
+  "there",
+  "their",
+  "what",
+  "so",
+  "up",
+  "out",
+  "if",
+  "about",
+  "who",
+  "get",
+  "which",
+  "go",
+  "me",
+  "when",
+  "make",
+  "can",
+  "like",
+  "time",
+  "no",
+  "just",
+  "him",
+  "know",
+  "take",
+  "people",
+  "into",
+  "year",
+  "your",
+  "good",
+  "some",
+  "could",
+  "them",
+  "see",
+  "other",
+  "than",
+  "then",
+  "now",
+  "look",
+  "only",
+  "come",
+  "its",
+  "over",
+  "think",
+  "also",
+  "back",
+  "after",
+  "use",
+  "two",
+  "how",
+  "our",
+  "work",
+  "first",
+  "well",
+  "way",
+  "even",
+  "new",
+  "want",
+  "because",
+  "any",
+  "these",
+  "give",
+  "day",
+  "most",
+  "us",
+  "great",
+  "between",
+  "need",
+  "large",
+  "often",
+  "hand",
+  "high",
+  "place",
+  "hold",
+  "turn",
+  "during",
+  "without",
+  "before",
+  "around",
+  "school",
+  "still",
+  "learn",
+  "plant",
+  "cover",
+  "food",
+  "sun",
+  "four",
+  "state",
+  "keep",
+  "never",
+  "last",
+  "let",
+  "thought",
+  "city",
+  "tree",
+  "cross",
+  "farm",
+  "hard",
+  "start",
+  "might",
+  "story",
+  "saw",
+  "far",
+  "sea",
+  "draw",
+  "left",
+  "late",
+  "run",
+  "while",
+  "press",
+  "close",
+  "night",
+  "real",
+  "life",
+  "few",
+  "open",
+  "seem",
+  "together",
+  "next",
+  "white",
+  "children",
+  "begin",
+  "got",
+  "walk",
+  "example",
+  "ease",
+  "paper",
+  "group",
+  "always",
+  "music",
+  "those",
+  "both",
+  "mark",
+  "often",
+  "letter",
+  "until",
+  "mile",
+  "river",
+  "car",
+  "feet",
+  "care",
+  "second",
+  "book",
+  "carry",
+  "took",
+  "science",
+  "eat",
+  "room",
+  "friend",
+  "began",
+  "idea",
+  "fish",
+  "mountain",
+  "stop",
+  "once",
+  "base",
+  "hear",
+  "horse",
+  "cut",
+  "sure",
+  "watch",
+  "color",
+  "face",
+  "wood",
+  "main",
+  "enough",
+  "plain",
+  "girl",
+  "usual",
+  "young",
+  "ready",
+  "above",
+  "ever",
+  "red",
+  "list",
+  "though",
+  "feel",
+  "talk",
+  "bird",
+  "soon",
+  "body",
+  "dog",
+  "family",
+  "direct",
+  "pose",
+  "leave",
+  "song",
+  "measure",
+  "door",
+  "product",
+  "black",
+  "short",
+  "numeral",
+  "class",
+  "wind",
+  "question",
+  "happen",
+  "complete",
+  "ship",
+  "area",
+  "half",
+  "rock",
+  "order",
+  "fire",
+  "south",
+  "piece",
+  "told",
+  "knew",
+  "pass",
+  "since",
+  "top",
+  "whole",
+  "king",
+  "space",
+  "heard",
+  "best",
+  "hour",
+  "better",
+  "true",
+  "hundred",
+  "five",
+  "remember",
+  "step",
+  "early",
+  "hold",
+  "west",
+  "ground",
+  "interest",
+  "reach",
+  "fast",
+  "verb",
+  "sing",
+  "listen",
+  "six",
+  "table",
+  "travel",
+  "less",
+  "morning",
+  "ten",
+  "simple",
+  "several",
+  "vowel",
+  "toward",
+  "war",
+  "lay",
+  "against",
+  "pattern",
+  "slow",
+  "center",
+  "love",
+  "person",
+  "money",
+  "serve",
+  "appear",
+  "road",
+  "map",
+  "rain",
+  "rule",
+  "govern",
+  "pull",
+  "cold",
+  "notice",
+  "voice",
+  "power",
+  "town",
+  "fine",
+  "drive",
+  "lead",
+  "cry",
+  "dark",
+  "machine",
+  "note",
+  "wait",
+  "plan",
+  "figure",
+  "star",
+  "box",
+  "noun",
+  "field",
+  "rest",
+  "correct",
+  "able",
+  "pound",
+  "done",
+  "beauty",
+  "stood",
+  "contain",
+  "front",
+  "teach",
+  "week",
+  "final",
+  "gave",
+  "green",
+  "oh",
+  "quick",
+  "develop",
+  "ocean",
+  "warm",
+  "free",
+  "minute",
+  "strong",
+  "special",
+  "mind",
+  "behind",
+  "clear",
+  "tail",
+  "produce",
+  "fact",
+  "street",
+  "inch",
+  "multiply",
+  "nothing",
+  "course",
+  "stay",
+  "wheel",
+  "full",
 ];
 
 // ── Keyboard row membership ────────────────────────────────────
 const ROW_KEYS = {
-  top:    new Set('qwertyuiop'.split('')),
-  home:   new Set('asdfghjkl'.split('')),
-  bottom: new Set('zxcvbnm'.split('')),
+  top: new Set("qwertyuiop".split("")),
+  home: new Set("asdfghjkl".split("")),
+  bottom: new Set("zxcvbnm".split("")),
 };
 
 function rowScore(word, rowSet) {
-  const letters = word.toLowerCase().split('').filter(c => /[a-z]/.test(c));
+  const letters = word
+    .toLowerCase()
+    .split("")
+    .filter((c) => /[a-z]/.test(c));
   if (!letters.length) return 0;
-  return letters.filter(c => rowSet.has(c)).length / letters.length;
+  return letters.filter((c) => rowSet.has(c)).length / letters.length;
 }
 
 // ── Active filter state ────────────────────────────────────────
 const F = {
-  row:       'all',   // 'all' | 'top' | 'home' | 'bottom'
-  len:       'all',   // 'all' | 'short' | 'medium' | 'long'
-  timedMode: 'off',  // 'off' | '1min'
-  display:   'word', // 'word' | 'paragraph' | 'rise'
-  jump:      false,  // skip word on space/enter without scoring
+  row: "all", // 'all' | 'top' | 'home' | 'bottom'
+  len: "all", // 'all' | 'short' | 'medium' | 'long'
+  timedMode: "off", // 'off' | '1min'
+  display: "word", // 'word' | 'paragraph' | 'rise'
+  jump: false, // skip word on space/enter without scoring
   sound: true,
   light: false,
 };
 
 function getPool() {
   // Use fetched API pool if ready, otherwise fall back to local WORDS (min 3 chars)
-  let pool = (_apiPool && _apiPool.length > 100) ? _apiPool : WORDS.filter(w => w.length >= 3);
+  let pool =
+    _apiPool && _apiPool.length > 100
+      ? _apiPool
+      : WORDS.filter((w) => w.length >= 3);
 
-  if (F.row !== 'all') {
+  if (F.row !== "all") {
     const rs = ROW_KEYS[F.row];
-    const filtered = pool.filter(w => rowScore(w, rs) >= 0.5);
+    const filtered = pool.filter((w) => rowScore(w, rs) >= 0.5);
     if (filtered.length >= 20) pool = filtered;
   }
 
-  if (F.len !== 'all') {
+  if (F.len !== "all") {
     const ranges = { short: [3, 4], medium: [5, 7], long: [8, 14] };
     const [min, max] = ranges[F.len];
-    const lpool = pool.filter(w => w.length >= min && w.length <= max);
+    const lpool = pool.filter((w) => w.length >= min && w.length <= max);
     if (lpool.length >= 20) pool = lpool;
   }
 
@@ -85,7 +409,7 @@ function getPool() {
 
 // ── Async word pool (Google 10k common words, no-swears list) ─
 const WORDS_API_URL =
-  'https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt';
+  "https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt";
 
 let _apiPool = null; // null=loading, []+=ready
 
@@ -93,9 +417,10 @@ async function fetchWordPool() {
   try {
     const resp = await fetch(WORDS_API_URL);
     const text = await resp.text();
-    _apiPool = text.split('\n')
-      .map(w => w.trim().toLowerCase())
-      .filter(w => /^[a-z]{3,14}$/.test(w));
+    _apiPool = text
+      .split("\n")
+      .map((w) => w.trim().toLowerCase())
+      .filter((w) => /^[a-z]{3,14}$/.test(w));
     rebuildQueue();
   } catch {
     _apiPool = []; // stay on local fallback
@@ -103,8 +428,6 @@ async function fetchWordPool() {
 }
 
 fetchWordPool();
-
-
 
 function shuffle(arr) {
   const a = [...arr];
@@ -115,11 +438,11 @@ function shuffle(arr) {
   return a;
 }
 
-let queue  = shuffle(WORDS);
+let queue = shuffle(WORDS);
 let queueI = 0;
 
 function rebuildQueue() {
-  queue  = shuffle(getPool());
+  queue = shuffle(getPool());
   queueI = 0;
 }
 
@@ -130,16 +453,19 @@ function nextWord() {
 
 // ── Context word buffer (paragraph / rise modes) ─────────────
 
-const CTX_SIZE  = 60;
+const CTX_SIZE = 60;
 const PARA_SIZE = 30;
+function getParaSize() {
+  return F.len === "long" ? 20 : PARA_SIZE;
+}
 let CTX = { buf: [], cur: 0, paraStart: 0 };
 
 function fillCtx() {
   while (CTX.buf.length - CTX.cur < CTX_SIZE) {
-    CTX.buf.push({ text: nextWord(), typed: '', ok: true });
+    CTX.buf.push({ text: nextWord(), typed: "", ok: true });
   }
   // Trim history (only for non-paragraph modes; paragraph uses absolute indices)
-  if (F.display !== 'paragraph' && CTX.cur > 5) {
+  if (F.display !== "paragraph" && CTX.cur > 5) {
     CTX.buf.splice(0, CTX.cur - 5);
     CTX.cur = 5;
   }
@@ -152,8 +478,8 @@ function resetCtx() {
 }
 
 function ensureParaBuf() {
-  while (CTX.buf.length < CTX.paraStart + PARA_SIZE) {
-    CTX.buf.push({ text: nextWord(), typed: '', ok: true });
+  while (CTX.buf.length < CTX.paraStart + getParaSize()) {
+    CTX.buf.push({ text: nextWord(), typed: "", ok: true });
   }
 }
 
@@ -161,27 +487,29 @@ function ensureParaBuf() {
 //  NOVELKEYS CREAM SOUNDS
 // ══════════════════════════════════════════════════════════════════════
 
-const SND_ROOT  = 'sounds/cream';
+const SND_ROOT = "sounds/cream";
 const GENERIC_N = 5;
-let   genericIdx = 0;
+let genericIdx = 0;
 
 function _audio(path) {
   const a = new Audio(path);
-  a.preload = 'auto';
+  a.preload = "auto";
   return a;
 }
 
 const SND = {
   press: {
-    generic:   Array.from({ length: GENERIC_N }, (_, i) => _audio(`${SND_ROOT}/press/GENERIC_R${i}.mp3`)),
-    space:     _audio(`${SND_ROOT}/press/SPACE.mp3`),
-    enter:     _audio(`${SND_ROOT}/press/ENTER.mp3`),
+    generic: Array.from({ length: GENERIC_N }, (_, i) =>
+      _audio(`${SND_ROOT}/press/GENERIC_R${i}.mp3`),
+    ),
+    space: _audio(`${SND_ROOT}/press/SPACE.mp3`),
+    enter: _audio(`${SND_ROOT}/press/ENTER.mp3`),
     backspace: _audio(`${SND_ROOT}/press/BACKSPACE.mp3`),
   },
   release: {
-    generic:   _audio(`${SND_ROOT}/release/GENERIC.mp3`),
-    space:     _audio(`${SND_ROOT}/release/SPACE.mp3`),
-    enter:     _audio(`${SND_ROOT}/release/ENTER.mp3`),
+    generic: _audio(`${SND_ROOT}/release/GENERIC.mp3`),
+    space: _audio(`${SND_ROOT}/release/SPACE.mp3`),
+    enter: _audio(`${SND_ROOT}/release/ENTER.mp3`),
     backspace: _audio(`${SND_ROOT}/release/BACKSPACE.mp3`),
   },
 };
@@ -192,7 +520,7 @@ const _decodeCache = new Map();
 function playWithGain(audio, gain) {
   if (!audio || !F.sound) return;
   const url = audio.src;
-  const doPlay = decoded => {
+  const doPlay = (decoded) => {
     const src = _actx.createBufferSource();
     src.buffer = decoded;
     const g = _actx.createGain();
@@ -201,17 +529,26 @@ function playWithGain(audio, gain) {
     g.connect(_actx.destination);
     src.start();
   };
-  if (_decodeCache.has(url)) { doPlay(_decodeCache.get(url)); return; }
+  if (_decodeCache.has(url)) {
+    doPlay(_decodeCache.get(url));
+    return;
+  }
   fetch(url)
-    .then(r => r.arrayBuffer())
-    .then(buf => _actx.decodeAudioData(buf))
-    .then(decoded => { _decodeCache.set(url, decoded); doPlay(decoded); })
+    .then((r) => r.arrayBuffer())
+    .then((buf) => _actx.decodeAudioData(buf))
+    .then((decoded) => {
+      _decodeCache.set(url, decoded);
+      doPlay(decoded);
+    })
     .catch(() => {});
 }
 
 function play(audio, gain = 1) {
   if (!audio || !F.sound) return;
-  if (gain !== 1) { playWithGain(audio, gain); return; }
+  if (gain !== 1) {
+    playWithGain(audio, gain);
+    return;
+  }
   const c = audio.cloneNode();
   c.volume = 1;
   c.play().catch(() => {});
@@ -219,15 +556,18 @@ function play(audio, gain = 1) {
 
 function soundFor(key, phase) {
   const k = key.toLowerCase();
-  if (phase === 'press') {
-    if (k === ' ')              play(SND.press.space);
-    else if (k === 'enter')     play(SND.press.enter);
-    else if (k === 'backspace') play(SND.press.backspace);
-    else { play(SND.press.generic[genericIdx % GENERIC_N], 1.6); genericIdx++; }
+  if (phase === "press") {
+    if (k === " ") play(SND.press.space);
+    else if (k === "enter") play(SND.press.enter);
+    else if (k === "backspace") play(SND.press.backspace);
+    else {
+      play(SND.press.generic[genericIdx % GENERIC_N], 1.6);
+      genericIdx++;
+    }
   } else {
-    if (k === ' ')              play(SND.release.space);
-    else if (k === 'enter')     play(SND.release.enter);
-    else if (k === 'backspace') play(SND.release.backspace);
+    if (k === " ") play(SND.release.space);
+    else if (k === "enter") play(SND.release.enter);
+    else if (k === "backspace") play(SND.release.backspace);
     else play(SND.release.generic, 1.6);
   }
 }
@@ -237,45 +577,45 @@ function soundFor(key, phase) {
 // ══════════════════════════════════════════════════════════════════════
 
 const S = {
-  started:     false,
-  ended:       false,
-  startTime:   null,
-  timerID:     null,
-  timedEnd:    null,
-  currentWord: '',
-  typed:       '',
-  wordsDone:   0,
-  correct:     0,
-  wrong:       0,
+  started: false,
+  ended: false,
+  startTime: null,
+  timerID: null,
+  timedEnd: null,
+  currentWord: "",
+  typed: "",
+  wordsDone: 0,
+  correct: 0,
+  wrong: 0,
 };
 
 // ══════════════════════════════════════════════════════════════════════
 //  ELEMENTS
 // ══════════════════════════════════════════════════════════════════════
 
-const $display  = document.getElementById('word-display');
-const $hint     = document.getElementById('hint');
-const $typer    = document.getElementById('typer');
-const $wpm      = document.getElementById('stat-wpm');
-const $acc      = document.getElementById('stat-acc');
-const $time     = document.getElementById('stat-time');
-const $words    = document.getElementById('stat-words');
-const $btnSound   = document.getElementById('btn-sound');
-const $btnTheme   = document.getElementById('btn-theme');
-const $btnSettings = document.getElementById('btn-settings');
-const $settingsPanel = document.getElementById('settings-panel');
-const $escHint    = document.getElementById('esc-hint');
-const $bgOrbs     = document.getElementById('bg-orbs');
+const $display = document.getElementById("word-display");
+const $hint = document.getElementById("hint");
+const $typer = document.getElementById("typer");
+const $wpm = document.getElementById("stat-wpm");
+const $acc = document.getElementById("stat-acc");
+const $time = document.getElementById("stat-time");
+const $words = document.getElementById("stat-words");
+const $btnSound = document.getElementById("btn-sound");
+const $btnTheme = document.getElementById("btn-theme");
+const $btnSettings = document.getElementById("btn-settings");
+const $settingsPanel = document.getElementById("settings-panel");
+const $escHint = document.getElementById("esc-hint");
+const $bgOrbs = document.getElementById("bg-orbs");
 
 let _idleTimer = null;
 function resetIdleTimer() {
   clearTimeout(_idleTimer);
-  $escHint.classList.remove('flash');
+  $escHint.classList.remove("flash");
   _idleTimer = setTimeout(() => {
     if (S.started) {
-      $escHint.classList.remove('flash'); // force reflow
+      $escHint.classList.remove("flash"); // force reflow
       void $escHint.offsetWidth;
-      $escHint.classList.add('flash');
+      $escHint.classList.add("flash");
     }
   }, 5000);
 }
@@ -285,18 +625,24 @@ function resetIdleTimer() {
 // ══════════════════════════════════════════════════════════════════════
 
 function renderWord() {
-  if (F.display === 'paragraph') { renderParagraph(); return; }
-  if (F.display === 'rise')      { renderRise();      return; }
+  if (F.display === "paragraph") {
+    renderParagraph();
+    return;
+  }
+  if (F.display === "rise") {
+    renderRise();
+    return;
+  }
 
-  $display.className = 'word-display';
-  const word  = S.currentWord;
+  $display.className = "word-display";
+  const word = S.currentWord;
   const typed = S.typed;
-  let   html  = '';
+  let html = "";
 
   for (let i = 0; i < word.length; i++) {
     if (i === typed.length) html += '<span class="caret"></span>';
-    let cls = 'ch';
-    if (i < typed.length) cls += typed[i] === word[i] ? ' correct' : ' wrong';
+    let cls = "ch";
+    if (i < typed.length) cls += typed[i] === word[i] ? " correct" : " wrong";
     html += `<span class="${cls}">${word[i]}</span>`;
   }
   if (typed.length >= word.length) html += '<span class="caret"></span>';
@@ -305,54 +651,65 @@ function renderWord() {
 }
 
 function renderParagraph() {
-  $display.className = 'word-display mode-paragraph';
+  $display.className = "word-display mode-paragraph";
   ensureParaBuf();
   const start = CTX.paraStart;
-  const end   = start + PARA_SIZE;
-  let html = '';
+  const end = start + getParaSize();
+  let html = "";
 
   for (let wi = start; wi < end; wi++) {
     const w = CTX.buf[wi];
-    html += `<span class="para-word ${wi < CTX.cur ? 'past' : wi === CTX.cur ? 'current' : 'future'}" data-wi="${wi}"`;
+    html += `<span class="para-word ${wi < CTX.cur ? "past" : wi === CTX.cur ? "current" : "future"}" data-wi="${wi}"`;
     if (wi === CTX.cur) html += ' id="para-cur"';
-    html += '>';
+    html += ">";
 
     if (wi < CTX.cur) {
       for (let i = 0; i < w.text.length; i++) {
-        const cls = (w.typed[i] === w.text[i]) ? 'ch correct' : 'ch wrong';
+        const cls = w.typed[i] === w.text[i] ? "ch correct" : "ch wrong";
         html += `<span class="${cls}">${w.text[i]}</span>`;
       }
     } else if (wi === CTX.cur) {
       for (let i = 0; i < w.text.length; i++) {
         if (i === S.typed.length) html += '<span class="caret"></span>';
-        let cls = 'ch';
-        if (i < S.typed.length) cls += S.typed[i] === w.text[i] ? ' correct' : ' wrong';
+        let cls = "ch";
+        if (i < S.typed.length)
+          cls += S.typed[i] === w.text[i] ? " correct" : " wrong";
         html += `<span class="${cls}">${w.text[i]}</span>`;
       }
-      if (S.typed.length >= w.text.length) html += '<span class="caret"></span>';
+      if (S.typed.length >= w.text.length)
+        html += '<span class="caret"></span>';
     } else {
       for (const c of w.text) html += `<span class="ch">${c}</span>`;
     }
-    html += '</span>';
+    html += "</span>";
   }
 
   $display.innerHTML = html;
+
+  // Keep the current word in view
+  const $cur = document.getElementById("para-cur");
+  if ($cur) {
+    const dispRect = $display.getBoundingClientRect();
+    const curRect = $cur.getBoundingClientRect();
+    // Scroll so the current word sits roughly 30% from the top of the container
+    $display.scrollTop += curRect.top - dispRect.top - dispRect.height * 0.3;
+  }
 }
 
 let _animateRise = false;
 let _riseTrack = null;
 
 function riseRowHtml(wi) {
-  if (wi < 0 || wi >= CTX.buf.length) return '';
+  if (wi < 0 || wi >= CTX.buf.length) return "";
   const w = CTX.buf[wi];
-  let html = '';
+  let html = "";
   if (wi < CTX.cur) {
     for (let i = 0; i < w.text.length; i++)
-      html += `<span class="${w.typed[i] === w.text[i] ? 'ch correct' : 'ch wrong'}">${w.text[i]}</span>`;
+      html += `<span class="${w.typed[i] === w.text[i] ? "ch correct" : "ch wrong"}">${w.text[i]}</span>`;
   } else if (wi === CTX.cur) {
     for (let i = 0; i < w.text.length; i++) {
       if (i === S.typed.length) html += '<span class="caret"></span>';
-      html += `<span class="ch${i < S.typed.length ? (S.typed[i] === w.text[i] ? ' correct' : ' wrong') : ''}">${w.text[i]}</span>`;
+      html += `<span class="ch${i < S.typed.length ? (S.typed[i] === w.text[i] ? " correct" : " wrong") : ""}">${w.text[i]}</span>`;
     }
     if (S.typed.length >= w.text.length) html += '<span class="caret"></span>';
   } else {
@@ -362,10 +719,11 @@ function riseRowHtml(wi) {
 }
 
 function buildRiseTrack() {
-  _riseTrack.innerHTML = '';
+  _riseTrack.innerHTML = "";
   for (let wi = CTX.cur - 1; wi <= CTX.cur + 1; wi++) {
-    const div = document.createElement('div');
-    div.className = 'rise-row ' + (wi === CTX.cur ? 'rise-current' : 'rise-near');
+    const div = document.createElement("div");
+    div.className =
+      "rise-row " + (wi === CTX.cur ? "rise-current" : "rise-near");
     div.innerHTML = riseRowHtml(wi);
     _riseTrack.appendChild(div);
   }
@@ -373,10 +731,14 @@ function buildRiseTrack() {
 
 function renderRise() {
   // Rebuild track if entering rise mode or after reset
-  if (!$display.classList.contains('mode-rise') || !_riseTrack || !$display.contains(_riseTrack)) {
-    $display.className = 'word-display mode-rise';
+  if (
+    !$display.classList.contains("mode-rise") ||
+    !_riseTrack ||
+    !$display.contains(_riseTrack)
+  ) {
+    $display.className = "word-display mode-rise";
     $display.innerHTML = '<div class="rise-track"></div>';
-    _riseTrack = $display.querySelector('.rise-track');
+    _riseTrack = $display.querySelector(".rise-track");
     buildRiseTrack();
     _animateRise = false;
     return;
@@ -384,26 +746,26 @@ function renderRise() {
 
   if (_animateRise) {
     _animateRise = false;
-    const rows = _riseTrack.querySelectorAll('.rise-row');
+    const rows = _riseTrack.querySelectorAll(".rise-row");
     if (rows.length >= 3) {
       // Update near-above row (was current) to show completed coloring
-      rows[1].className = 'rise-row rise-near';
+      rows[1].className = "rise-row rise-near";
       rows[1].innerHTML = riseRowHtml(CTX.cur - 1);
       // Update new current row (was near-below)
-      rows[2].className = 'rise-row rise-current';
+      rows[2].className = "rise-row rise-current";
       rows[2].innerHTML = riseRowHtml(CTX.cur);
       // Add new near-below
-      const newRow = document.createElement('div');
-      newRow.className = 'rise-row rise-near';
+      const newRow = document.createElement("div");
+      newRow.className = "rise-row rise-near";
       newRow.innerHTML = riseRowHtml(CTX.cur + 1);
       _riseTrack.appendChild(newRow);
       // Animate track up by one slot, then remove exit row
       requestAnimationFrame(() => {
-        _riseTrack.style.transition = 'transform 0.2s ease-in-out';
-        _riseTrack.style.transform = 'translateY(-8rem)';
+        _riseTrack.style.transition = "transform 0.2s ease-in-out";
+        _riseTrack.style.transform = "translateY(-8rem)";
         setTimeout(() => {
-          _riseTrack.style.transition = 'none';
-          _riseTrack.style.transform = '';
+          _riseTrack.style.transition = "none";
+          _riseTrack.style.transform = "";
           rows[0].remove();
         }, 215);
       });
@@ -412,8 +774,8 @@ function renderRise() {
   }
 
   // Keystroke: only update current row content
-  const rows = _riseTrack.querySelectorAll('.rise-row');
-  const curRow = [...rows].find(r => r.classList.contains('rise-current'));
+  const rows = _riseTrack.querySelectorAll(".rise-row");
+  const curRow = [...rows].find((r) => r.classList.contains("rise-current"));
   if (curRow) curRow.innerHTML = riseRowHtml(CTX.cur);
 }
 
@@ -423,19 +785,22 @@ function renderRise() {
 
 function fmtTime(ms) {
   const s = Math.floor(ms / 1000);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
 function updateStats() {
   if (!S.started) return;
   const elapsed = performance.now() - S.startTime;
-  const mins    = elapsed / 60000;
+  const mins = elapsed / 60000;
 
   if (S.timedEnd !== null) {
     const remaining = S.timedEnd - performance.now();
-    if (remaining <= 0) { endGame(); return; }
+    if (remaining <= 0) {
+      endGame();
+      return;
+    }
     $time.textContent = fmtTime(remaining);
-    $time.classList.add('live');
+    $time.classList.add("live");
   } else {
     $time.textContent = fmtTime(elapsed);
   }
@@ -445,8 +810,10 @@ function updateStats() {
   if (S.wordsDone > 0) {
     $wpm.textContent = Math.round(S.wordsDone / (mins || 0.0001));
     const total = S.correct + S.wrong;
-    $acc.textContent = total ? Math.round((S.correct / total) * 100) + '%' : '—';
-    [$wpm, $acc, $time, $words].forEach(el => el.classList.add('live'));
+    $acc.textContent = total
+      ? Math.round((S.correct / total) * 100) + "%"
+      : "—";
+    [$wpm, $acc, $time, $words].forEach((el) => el.classList.add("live"));
   }
 }
 
@@ -455,116 +822,137 @@ function updateStats() {
 // ══════════════════════════════════════════════════════════════════════
 
 function loadNextWord() {
-  if (F.display === 'paragraph') {
+  if (F.display === "paragraph") {
     ensureParaBuf();
     S.currentWord = CTX.buf[CTX.cur].text;
-  } else if (F.display !== 'word') {
+  } else if (F.display !== "word") {
     fillCtx();
     S.currentWord = CTX.buf[CTX.cur].text;
   } else {
     S.currentWord = nextWord();
   }
-  S.typed      = '';
-  $typer.value = '';
+  S.typed = "";
+  $typer.value = "";
   renderWord();
 }
 
 function reset() {
   clearInterval(S.timerID);
-  S.started     = false;
-  S.ended       = false;
-  S.startTime   = null;
-  S.timerID     = null;
-  S.timedEnd    = null;
-  S.currentWord = '';
-  S.typed       = '';
-  S.wordsDone   = 0;
-  S.correct     = 0;
-  S.wrong       = 0;
-  $typer.value  = '';
-  $display.innerHTML = '';
-  $display.className = 'word-display';
-  $display.style.display = 'none';
+  S.started = false;
+  S.ended = false;
+  S.startTime = null;
+  S.timerID = null;
+  S.timedEnd = null;
+  S.currentWord = "";
+  S.typed = "";
+  S.wordsDone = 0;
+  S.correct = 0;
+  S.wrong = 0;
+  $typer.value = "";
+  $display.innerHTML = "";
+  $display.className = "word-display";
+  $display.style.display = "none";
   resetCtx();
-  [$wpm, $acc, $time, $words].forEach(el => {
-    el.textContent = '—';
-    el.classList.remove('live');
+  [$wpm, $acc, $time, $words].forEach((el) => {
+    el.textContent = "—";
+    el.classList.remove("live");
   });
-  $time.textContent = '0:00';
-  $words.textContent = '0';
+  $time.textContent = "0:00";
+  $words.textContent = "0";
   clearTimeout(_idleTimer);
-  $escHint.classList.remove('visible', 'flash');
+  $escHint.classList.remove("visible", "flash");
   unlockToolbar();
-  $bgOrbs.classList.remove('hide');
+  $bgOrbs.classList.remove("hide");
   $hint.innerHTML = 'press <span class="hint-key">enter</span> to start';
-  $hint.classList.remove('hidden');
+  $hint.classList.remove("hidden");
 }
 
 function endGame() {
   clearInterval(S.timerID);
   S.started = false;
-  S.ended   = true;
+  S.ended = true;
   S.timedEnd = null;
   clearTimeout(_idleTimer);
-  $escHint.classList.remove('visible', 'flash');
+  $escHint.classList.remove("visible", "flash");
   unlockToolbar();
-  $bgOrbs.classList.remove('hide');
+  $bgOrbs.classList.remove("hide");
   $typer.blur();
-  $display.innerHTML = '';
-  $display.className = 'word-display';
-  $display.style.display = 'none';
+  $display.innerHTML = "";
+  $display.className = "word-display";
+  $display.style.display = "none";
   // Show final results in hint area
   const elapsed = performance.now() - S.startTime;
-  const mins    = elapsed / 60000;
-  const wpm     = S.wordsDone > 0 ? Math.round(S.wordsDone / (mins || 0.0001)) : 0;
-  const total   = S.correct + S.wrong;
-  const acc     = total ? Math.round((S.correct / total) * 100) : 0;
+  const mins = elapsed / 60000;
+  const wpm = S.wordsDone > 0 ? Math.round(S.wordsDone / (mins || 0.0001)) : 0;
+  const total = S.correct + S.wrong;
+  const acc = total ? Math.round((S.correct / total) * 100) : 0;
   $hint.innerHTML =
     `<span class="hint-stat">${wpm} wpm</span>` +
     `<span class="hint-sep">/</span>` +
     `<span class="hint-stat">${acc}%</span>` +
     `<br><span class="hint-sub">press <span class="hint-key">enter</span> to play again</span>`;
-  $hint.classList.remove('hidden');
+  $hint.classList.remove("hidden");
 }
 
-// ── Toolbar lock (timed mode only) ──────────────────────────
-const LOCKABLE = ['tg-row', 'tg-len', 'tg-time'];
+// ── Toolbar lock (any gameplay) ────────────────────────────
+const LOCKABLE = ["tg-row", "tg-len", "tg-time"];
+const LOCKABLE_SPANEL = ["sp-display", "sp-jump"];
 
 function lockToolbar() {
-  LOCKABLE.forEach(id => {
-    document.getElementById(id).querySelectorAll('.tool-btn').forEach(b => {
-      b.disabled = true;
-    });
+  LOCKABLE.forEach((id) => {
+    document
+      .getElementById(id)
+      .querySelectorAll(".tool-btn")
+      .forEach((b) => {
+        b.disabled = true;
+      });
   });
-  document.getElementById('tg-row').closest('nav').classList.add('toolbar-locked');
+  document
+    .getElementById("tg-row")
+    .closest("nav")
+    .classList.add("toolbar-locked");
+  LOCKABLE_SPANEL.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.closest(".spanel-row").classList.add("spanel-locked");
+  });
 }
 
 function unlockToolbar() {
-  LOCKABLE.forEach(id => {
-    document.getElementById(id).querySelectorAll('.tool-btn').forEach(b => {
-      b.disabled = false;
-    });
+  LOCKABLE.forEach((id) => {
+    document
+      .getElementById(id)
+      .querySelectorAll(".tool-btn")
+      .forEach((b) => {
+        b.disabled = false;
+      });
   });
-  document.getElementById('tg-row').closest('nav').classList.remove('toolbar-locked');
+  document
+    .getElementById("tg-row")
+    .closest("nav")
+    .classList.remove("toolbar-locked");
+  LOCKABLE_SPANEL.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.closest(".spanel-row").classList.remove("spanel-locked");
+  });
 }
 
 function start() {
   if (S.started) return;
   // Animate hint out, then launch
-  $hint.classList.add('exiting');
+  $hint.classList.add("exiting");
   setTimeout(() => {
-    $hint.classList.remove('exiting');
+    $hint.classList.remove("exiting");
     if (S.ended) reset(); // resets state; reset() restores hint but we'll immediately hide it
-    S.started   = true;
+    S.started = true;
     S.startTime = performance.now();
-    S.timedEnd  = F.timedMode === '1min' ? performance.now() + 60000 : null;
-    S.timerID   = setInterval(updateStats, 200);
-    if (F.timedMode === '1min') lockToolbar();
-    $bgOrbs.classList.add('hide');
+    S.timedEnd = F.timedMode === "1min" ? performance.now() + 60000 : null;
+    S.timerID = setInterval(updateStats, 200);
+    lockToolbar();
+    $bgOrbs.classList.add("hide");
     resetCtx();
-    $hint.classList.add('hidden');
-    $display.style.display = '';
-    $escHint.classList.add('visible');
+    $hint.classList.add("hidden");
+    $display.style.display = "";
+    $escHint.classList.add("visible");
     resetIdleTimer();
     $typer.focus();
     loadNextWord();
@@ -573,34 +961,35 @@ function start() {
 
 function skipWord() {
   if (!S.started) return;
-  if (F.display !== 'word') {
-    CTX.buf[CTX.cur].typed = '';
-    CTX.buf[CTX.cur].ok    = true; // neutral — not penalised
+  if (F.display !== "word") {
+    CTX.buf[CTX.cur].typed = "";
+    CTX.buf[CTX.cur].ok = true; // neutral — not penalised
     CTX.cur++;
   }
-  if (F.display === 'rise') _animateRise = true;
-  if (F.display === 'paragraph' && CTX.cur >= CTX.paraStart + PARA_SIZE) {
+  if (F.display === "rise") _animateRise = true;
+  if (F.display === "paragraph" && CTX.cur >= CTX.paraStart + getParaSize()) {
     CTX.paraStart = CTX.cur;
     ensureParaBuf();
   }
-  S.typed = '';
-  $typer.value = '';
+  S.typed = "";
+  $typer.value = "";
   loadNextWord();
 }
 
 function submitWord() {
-  if (!S.started || S.typed.trim() === '') return;
+  if (!S.started || S.typed.trim() === "") return;
   const correct = S.typed === S.currentWord;
-  if (correct) S.correct++; else S.wrong++;
+  if (correct) S.correct++;
+  else S.wrong++;
   S.wordsDone++;
-  if (F.display !== 'word') {
+  if (F.display !== "word") {
     CTX.buf[CTX.cur].typed = S.typed;
-    CTX.buf[CTX.cur].ok    = correct;
+    CTX.buf[CTX.cur].ok = correct;
     CTX.cur++;
   }
-  if (F.display === 'rise') _animateRise = true;
+  if (F.display === "rise") _animateRise = true;
   // Paragraph: flip to next paragraph when current one is fully typed
-  if (F.display === 'paragraph' && CTX.cur >= CTX.paraStart + PARA_SIZE) {
+  if (F.display === "paragraph" && CTX.cur >= CTX.paraStart + getParaSize()) {
     CTX.paraStart = CTX.cur;
     ensureParaBuf();
   }
@@ -612,14 +1001,14 @@ function submitWord() {
 //  KEYBOARD INPUT
 // ══════════════════════════════════════════════════════════════════════
 
-const IGNORE_KEYS = ['Shift','Control','Alt','Meta','CapsLock','Tab'];
+const IGNORE_KEYS = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
 
-document.addEventListener('keydown', e => {
+document.addEventListener("keydown", (e) => {
   if (IGNORE_KEYS.includes(e.key)) return;
 
-  if (!e.repeat) soundFor(e.key, 'press');
+  if (!e.repeat) soundFor(e.key, "press");
 
-  if (e.key === 'Escape' && S.started) {
+  if (e.key === "Escape" && S.started) {
     e.preventDefault();
     endGame();
     return;
@@ -627,33 +1016,33 @@ document.addEventListener('keydown', e => {
 
   if (!S.started) {
     // Animate the "enter" hint-key on press (game starts on release)
-    if (e.key === 'Enter' && !e.repeat) {
+    if (e.key === "Enter" && !e.repeat) {
       e.preventDefault();
-      const enterEl = $hint.querySelector('.hint-key');
+      const enterEl = $hint.querySelector(".hint-key");
       if (enterEl) {
-        enterEl.classList.remove('pressed');
+        enterEl.classList.remove("pressed");
         void enterEl.offsetWidth; // reflow to restart
-        enterEl.classList.add('pressed');
+        enterEl.classList.add("pressed");
       }
     }
     return;
   }
 });
 
-document.addEventListener('keyup', e => {
+document.addEventListener("keyup", (e) => {
   if (IGNORE_KEYS.includes(e.key)) return;
-  soundFor(e.key, 'release');
-  if (!S.started && e.key === 'Enter') {
+  soundFor(e.key, "release");
+  if (!S.started && e.key === "Enter") {
     start();
   }
 });
 
-$typer.addEventListener('input', () => {
+$typer.addEventListener("input", () => {
   if (!S.started) return;
   resetIdleTimer();
   const val = $typer.value;
-  if (val.endsWith(' ')) {
-    $typer.value = '';
+  if (val.endsWith(" ")) {
+    $typer.value = "";
     S.typed = val.trimEnd();
     submitWord();
     return;
@@ -662,33 +1051,41 @@ $typer.addEventListener('input', () => {
   renderWord();
   // Jump mode: auto-submit when all characters of the word are typed
   if (F.jump && val.length >= S.currentWord.length) {
-    $typer.value = '';
+    $typer.value = "";
     submitWord();
   }
 });
 
-$typer.addEventListener('keydown', e => {
+$typer.addEventListener("keydown", (e) => {
   if (!S.started) return;
-  if (e.key === 'Enter') {
+  if (e.key === "Enter") {
     e.preventDefault();
-    if (F.jump) { $typer.value = ''; skipWord(); return; }
+    if (F.jump) {
+      $typer.value = "";
+      skipWord();
+      return;
+    }
     S.typed = $typer.value.trimEnd();
-    $typer.value = '';
+    $typer.value = "";
     submitWord();
   }
 });
 
-document.addEventListener('click', () => { if (S.started) $typer.focus(); });
+document.addEventListener("click", () => {
+  if (S.started) $typer.focus();
+});
 
 // ══════════════════════════════════════════════════════════════════════
 //  TOOLBAR
 // ══════════════════════════════════════════════════════════════════════
 
 function bindGroup(groupId, stateKey) {
-  document.querySelectorAll(`#${groupId} .tool-btn`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll(`#${groupId} .tool-btn`).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  document.querySelectorAll(`#${groupId} .tool-btn`).forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(`#${groupId} .tool-btn`)
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       F[stateKey] = btn.dataset.val;
       savePrefs();
       rebuildQueue();
@@ -698,131 +1095,153 @@ function bindGroup(groupId, stateKey) {
 }
 
 // ── Preferences persistence ───────────────────────────────────────────
-const PREF_KEY = 'novltype_prefs';
+const PREF_KEY = "novltype_prefs";
 
 function savePrefs() {
-  try { localStorage.setItem(PREF_KEY, JSON.stringify(F)); } catch (_) {}
+  try {
+    localStorage.setItem(PREF_KEY, JSON.stringify(F));
+  } catch (_) {}
 }
 
 function loadPrefs() {
   let saved;
-  try { saved = JSON.parse(localStorage.getItem(PREF_KEY)); } catch (_) {}
+  try {
+    saved = JSON.parse(localStorage.getItem(PREF_KEY));
+  } catch (_) {}
   if (!saved) return;
 
   // Merge saved into F
-  const keys = ['row','len','timedMode','display','jump','sound','light'];
-  keys.forEach(k => { if (k in saved) F[k] = saved[k]; });
+  const keys = ["row", "len", "timedMode", "display", "jump", "sound", "light"];
+  keys.forEach((k) => {
+    if (k in saved) F[k] = saved[k];
+  });
 
   // Sync toolbar: row, len
-  ['tg-row','tg-len'].forEach(id => {
-    const key = id === 'tg-row' ? 'row' : 'len';
-    document.querySelectorAll(`#${id} .tool-btn`).forEach(b => {
-      b.classList.toggle('active', b.dataset.val === F[key]);
+  ["tg-row", "tg-len"].forEach((id) => {
+    const key = id === "tg-row" ? "row" : "len";
+    document.querySelectorAll(`#${id} .tool-btn`).forEach((b) => {
+      b.classList.toggle("active", b.dataset.val === F[key]);
     });
   });
 
   // Sync timed mode
-  document.querySelectorAll('#tg-time .tool-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === F.timedMode);
+  document.querySelectorAll("#tg-time .tool-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.val === F.timedMode);
   });
 
   // Sync display
-  document.querySelectorAll('#sp-display .spanel-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === F.display);
+  document.querySelectorAll("#sp-display .spanel-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.val === F.display);
   });
 
   // Sync jump
-  document.querySelectorAll('#sp-jump .spanel-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === (F.jump ? 'on' : 'type'));
+  document.querySelectorAll("#sp-jump .spanel-btn").forEach((b) => {
+    b.classList.toggle("active", b.dataset.val === (F.jump ? "on" : "type"));
   });
 
   // Sync sound
-  const $bs = document.getElementById('btn-sound');
-  if ($bs) { $bs.textContent = F.sound ? 'on' : 'off'; $bs.classList.toggle('active', F.sound); }
+  const $bs = document.getElementById("btn-sound");
+  if ($bs) {
+    $bs.textContent = F.sound ? "on" : "off";
+    $bs.classList.toggle("active", F.sound);
+  }
 
   // Sync theme
-  document.body.classList.toggle('light', F.light);
-  const $bt = document.getElementById('btn-theme');
-  if ($bt) { $bt.textContent = F.light ? 'dark' : 'light'; $bt.classList.toggle('active', F.light); }
+  document.body.classList.toggle("light", F.light);
+  const $bt = document.getElementById("btn-theme");
+  if ($bt) {
+    $bt.textContent = F.light ? "dark" : "light";
+    $bt.classList.toggle("active", F.light);
+  }
 }
 
-bindGroup('tg-row', 'row');
-bindGroup('tg-len', 'len');
+bindGroup("tg-row", "row");
+bindGroup("tg-len", "len");
 
 // Timed mode toggle
-document.querySelectorAll('#tg-time .tool-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#tg-time .tool-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+document.querySelectorAll("#tg-time .tool-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll("#tg-time .tool-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
     F.timedMode = btn.dataset.val;
     savePrefs();
-    if (S.started || S.ended) { reset(); }
+    if (S.started || S.ended) {
+      reset();
+    }
   });
 });
 
 // Settings panel toggle
-$btnSettings.addEventListener('click', e => {
+$btnSettings.addEventListener("click", (e) => {
   e.stopPropagation();
-  const open = $settingsPanel.classList.toggle('open');
-  $btnSettings.classList.toggle('open', open);
+  const open = $settingsPanel.classList.toggle("open");
+  $btnSettings.classList.toggle("open", open);
 });
 
-document.addEventListener('click', () => {
-  $settingsPanel.classList.remove('open');
-  $btnSettings.classList.remove('open');
+document.addEventListener("click", () => {
+  $settingsPanel.classList.remove("open");
+  $btnSettings.classList.remove("open");
 });
 
-$settingsPanel.addEventListener('click', e => e.stopPropagation());
+$settingsPanel.addEventListener("click", (e) => e.stopPropagation());
 
 // Display setting
-document.querySelectorAll('#sp-display .spanel-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#sp-display .spanel-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll("#sp-display .spanel-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
     F.display = btn.dataset.val;
     savePrefs();
-    if (S.started || S.ended) { reset(); }
+    if (S.started || S.ended) {
+      reset();
+    }
   });
 });
 
 // Jump setting
-document.querySelectorAll('#sp-jump .spanel-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#sp-jump .spanel-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    F.jump = btn.dataset.val === 'on';
+document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll("#sp-jump .spanel-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    F.jump = btn.dataset.val === "on";
     savePrefs();
   });
 });
 
 // Sound toggle
-$btnSound.addEventListener('click', () => {
+$btnSound.addEventListener("click", () => {
   F.sound = !F.sound;
   savePrefs();
-  $btnSound.textContent = F.sound ? 'on' : 'off';
-  $btnSound.classList.toggle('active', F.sound);
+  $btnSound.textContent = F.sound ? "on" : "off";
+  $btnSound.classList.toggle("active", F.sound);
 });
 
 // Theme toggle
-$btnTheme.addEventListener('click', () => {
+$btnTheme.addEventListener("click", () => {
   F.light = !F.light;
   savePrefs();
-  document.body.classList.toggle('light', F.light);
-  $btnTheme.textContent = F.light ? 'dark' : 'light';
-  $btnTheme.classList.toggle('active', F.light);
+  document.body.classList.toggle("light", F.light);
+  $btnTheme.textContent = F.light ? "dark" : "light";
+  $btnTheme.classList.toggle("active", F.light);
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────
 loadPrefs();
 // Word display stays empty until Enter is pressed
-$display.style.display = 'none';
+$display.style.display = "none";
 
 // ── Tooltip ───────────────────────────────────────────────────────────
-const $tip = document.getElementById('tip');
+const $tip = document.getElementById("tip");
 let _tipTimer = null;
 
-document.addEventListener('mouseover', e => {
-  const target = e.target.closest('[data-tip]');
+document.addEventListener("mouseover", (e) => {
+  const target = e.target.closest("[data-tip]");
   if (!target) return;
   clearTimeout(_tipTimer);
   $tip.textContent = target.dataset.tip;
@@ -832,15 +1251,232 @@ document.addEventListener('mouseover', e => {
     let left = r.left + r.width / 2 - tw / 2;
     left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
     const top = r.top - $tip.offsetHeight - 8;
-    $tip.style.left = left + 'px';
-    $tip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
-    $tip.classList.add('visible');
+    $tip.style.left = left + "px";
+    $tip.style.top = (top < 8 ? r.bottom + 8 : top) + "px";
+    $tip.classList.add("visible");
   }, 400);
 });
 
-document.addEventListener('mouseout', e => {
-  const target = e.target.closest('[data-tip]');
+document.addEventListener("mouseout", (e) => {
+  const target = e.target.closest("[data-tip]");
   if (!target) return;
   clearTimeout(_tipTimer);
-  $tip.classList.remove('visible');
+  $tip.classList.remove("visible");
 });
+
+// ══════════════════════════════════════════════════════════════════════
+//  BACKGROUND GRID
+// ══════════════════════════════════════════════════════════════════════
+
+(function initBgGrid() {
+  const canvas = document.getElementById("bg-grid");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  const CELL = 48; // px per grid cell
+  const IDLE_COUNT = 14; // number of always-on ambient highlights
+  const MOUSE_RADIUS = 3; // cells lit around cursor
+  const MOUSE_PEAK = 0.18;
+  const IDLE_PEAK = 0.1;
+  const FADE_SPEED = 0.04; // per-frame fade step
+
+  let cols, rows, cells;
+  let mouseCol = -999,
+    mouseRow = -999;
+  let isLight = document.body.classList.contains("light");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols = Math.ceil(canvas.width / CELL) + 1;
+    rows = Math.ceil(canvas.height / CELL) + 1;
+    buildCells();
+  }
+
+  let colTopCut = []; // per-column last visible top row
+  let colBotCut = []; // per-column first visible bottom row
+  let rowLeftCut = []; // per-row last visible left col (in center band)
+  let rowRightCut = []; // per-row first visible right col (in center band)
+
+  function buildSkyline() {
+    colTopCut = [];
+    colBotCut = [];
+    rowLeftCut = [];
+    rowRightCut = [];
+    const baseTop = Math.round(rows * 0.3) - 1;
+    const baseBot = Math.round(rows * 0.7) - 1;
+    const baseLeft = Math.round(cols * 0.18);
+    const baseRight = Math.round(cols * 0.82);
+    for (let c = 0; c < cols; c++) {
+      colTopCut.push(baseTop + Math.floor(Math.random() * 3) - 1);
+      colBotCut.push(baseBot + Math.floor(Math.random() * 3) - 1);
+    }
+    for (let r = 0; r < rows; r++) {
+      rowLeftCut.push(baseLeft + Math.floor(Math.random() * 3) - 1);
+      rowRightCut.push(baseRight + Math.floor(Math.random() * 3) - 1);
+    }
+    // pad extra entries for border lines
+    colTopCut.push(colTopCut[cols - 1]);
+    colBotCut.push(colBotCut[cols - 1]);
+    rowLeftCut.push(rowLeftCut[rows - 1]);
+    rowRightCut.push(rowRightCut[rows - 1]);
+  }
+
+  function buildCells() {
+    cells = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        cells.push({
+          r,
+          c,
+          alpha: 0,
+          target: 0,
+          idle: false,
+          idlePhase: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+    buildSkyline();
+    seedIdle();
+  }
+
+  function seedIdle() {
+    // randomly pick IDLE_COUNT cells to gently pulse
+    const indices = cells
+      .map((_, i) => i)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, IDLE_COUNT);
+    indices.forEach((i) => {
+      cells[i].idle = true;
+    });
+  }
+
+  function getCell(c, r) {
+    if (c < 0 || r < 0 || c >= cols || r >= rows) return null;
+    return cells[r * cols + c];
+  }
+
+  let t = 0;
+  function draw() {
+    t += 0.012;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    isLight = document.body.classList.contains("light");
+    // Grid line color
+    const lineColor = isLight ? "rgba(0,0,0,0.045)" : "rgba(255,255,255,0.045)";
+    // Block fill color base
+    const blockR = isLight ? 0 : 107;
+    const blockG = isLight ? 0 : 107;
+    const blockB = isLight ? 0 : 255;
+
+    // Draw grid lines — each column has its own top/bottom cut (skyline)
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 1;
+
+    // cellVisible: returns true if a cell should be drawn (part of the frame, not the clear center)
+    function cellVisible(c, r) {
+      if (c < 0 || r < 0 || c >= cols || r >= rows) return true; // treat outside as visible → draws screen-edge lines
+      const tc = colTopCut[c];
+      const bc = colBotCut[c];
+      const lc = rowLeftCut[r];
+      const rc = rowRightCut[r];
+      const inCenterV = r >= tc && r < bc;
+      const inCenterH = c > lc && c < rc;
+      return !(inCenterV && inCenterH);
+    }
+
+    // Horizontal lines — merged runs per row
+    for (let r = 0; r <= rows; r++) {
+      let start = null;
+      for (let c = 0; c <= cols; c++) {
+        const vis = cellVisible(c, r - 1) || cellVisible(c, r);
+        if (vis && start === null) start = c;
+        if (!vis && start !== null) {
+          ctx.beginPath();
+          ctx.moveTo(start * CELL + 0.5, r * CELL + 0.5);
+          ctx.lineTo(c * CELL + 0.5, r * CELL + 0.5);
+          ctx.stroke();
+          start = null;
+        }
+      }
+      if (start !== null) {
+        ctx.beginPath();
+        ctx.moveTo(start * CELL + 0.5, r * CELL + 0.5);
+        ctx.lineTo(cols * CELL + 0.5, r * CELL + 0.5);
+        ctx.stroke();
+      }
+    }
+
+    // Vertical lines — merged runs per column
+    for (let c = 0; c <= cols; c++) {
+      let start = null;
+      for (let r = 0; r <= rows; r++) {
+        const vis = cellVisible(c - 1, r) || cellVisible(c, r);
+        if (vis && start === null) start = r;
+        if (!vis && start !== null) {
+          ctx.beginPath();
+          ctx.moveTo(c * CELL + 0.5, start * CELL + 0.5);
+          ctx.lineTo(c * CELL + 0.5, r * CELL + 0.5);
+          ctx.stroke();
+          start = null;
+        }
+      }
+      if (start !== null) {
+        ctx.beginPath();
+        ctx.moveTo(c * CELL + 0.5, start * CELL + 0.5);
+        ctx.lineTo(c * CELL + 0.5, rows * CELL + 0.5);
+        ctx.stroke();
+      }
+    }
+
+    // Update & draw cells
+    cells.forEach((cell) => {
+      // Idle pulse target
+      if (cell.idle) {
+        cell.target =
+          IDLE_PEAK *
+          (0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t * 0.9 + cell.idlePhase)));
+      } else {
+        // Mouse proximity
+        const dc = cell.c - mouseCol;
+        const dr = cell.r - mouseRow;
+        const dist = Math.sqrt(dc * dc + dr * dr);
+        cell.target =
+          dist < MOUSE_RADIUS ? MOUSE_PEAK * (1 - dist / MOUSE_RADIUS) : 0;
+      }
+
+      // Lerp alpha toward target
+      const diff = cell.target - cell.alpha;
+      cell.alpha += diff * (diff > 0 ? 0.18 : FADE_SPEED);
+
+      if (cell.alpha < 0.005) return;
+
+      // A cell is hidden only if it's inside the center rectangle on both axes
+      const tc = colTopCut[cell.c] ?? 0;
+      const bc = colBotCut[cell.c] ?? rows;
+      const lc = rowLeftCut[cell.r] ?? 0;
+      const rc = rowRightCut[cell.r] ?? cols;
+      const inCenterV = cell.r >= tc && cell.r < bc;
+      const inCenterH = cell.c > lc && cell.c < rc;
+      if (inCenterV && inCenterH) return;
+
+      ctx.fillStyle = `rgba(${blockR},${blockG},${blockB},${cell.alpha})`;
+      ctx.fillRect(cell.c * CELL + 1, cell.r * CELL + 1, CELL - 2, CELL - 2);
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener("resize", resize);
+  window.addEventListener("mousemove", (e) => {
+    mouseCol = Math.floor(e.clientX / CELL);
+    mouseRow = Math.floor(e.clientY / CELL);
+  });
+  window.addEventListener("mouseleave", () => {
+    mouseCol = -999;
+    mouseRow = -999;
+  });
+
+  resize();
+  draw();
+})();
