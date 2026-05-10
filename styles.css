@@ -98,13 +98,18 @@ body {
 
 .wordmark {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
-  color: var(--dim);
+  color: var(--text);
   letter-spacing: -0.02em;
   user-select: none;
   white-space: nowrap;
   flex-shrink: 0;
+  text-decoration: none;
+}
+
+.wordmark:hover {
+  opacity: 0.75;
 }
 
 .wordmark .dot {
