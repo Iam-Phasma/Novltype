@@ -12,8 +12,71 @@ function fmtTime(ms) {
 const READY_TOTAL_DOTS = 5;
 const READY_STEP_MS = 1000;
 const READY_BLINK_MS = 320;
+const $app = document.getElementById("app");
+const $statsBar = document.querySelector(".stats-bar");
 let _readyStepTimer = null;
 let _readyBlinkTimer = null;
+let _resultPromptTimer = null;
+let _resultPromptIdx = 0;
+
+function setStatsBarVisible(visible) {
+  if (!$statsBar) return;
+  $statsBar.classList.toggle("hidden", !visible);
+}
+
+function setPrestartLayout(enabled) {
+  if (!$app) return;
+  $app.classList.toggle("prestart", !!enabled);
+}
+
+const RESULT_PROMPTS = [
+  [
+    { text: "press" },
+    { text: START_KEY_LABEL, key: true },
+    { text: "to" },
+    { text: "play" },
+    { text: "again" },
+  ],
+  [
+    { text: "press" },
+    { text: "esc", key: true },
+    { text: "to" },
+    { text: "quit" },
+    { text: "game" },
+  ],
+];
+
+function stopResultPromptCycle() {
+  clearInterval(_resultPromptTimer);
+  _resultPromptTimer = null;
+}
+
+function renderResultPrompt() {
+  const $action = document.getElementById("hint-action-text");
+  if (!$action) return;
+  const tokens = RESULT_PROMPTS[_resultPromptIdx] || [];
+  $action.innerHTML = tokens
+    .map((t, i) => {
+      if (t.key) {
+        return `<span class="hint-word hint-word-key" style="--widx:${i}"><span class="hint-key">${t.text}</span></span>`;
+      }
+      return `<span class="hint-word" style="--widx:${i}">${t.text}</span>`;
+    })
+    .join("");
+  $action.classList.remove("hint-sub-anim-live");
+  void $action.offsetWidth;
+  $action.classList.add("hint-sub-anim-live");
+}
+
+function startResultPromptCycle() {
+  stopResultPromptCycle();
+  _resultPromptIdx = 0;
+  renderResultPrompt();
+  _resultPromptTimer = setInterval(() => {
+    _resultPromptIdx = (_resultPromptIdx + 1) % RESULT_PROMPTS.length;
+    renderResultPrompt();
+  }, 3000);
+}
 
 function clearReadySequenceTimers() {
   clearTimeout(_readyStepTimer);
@@ -72,12 +135,10 @@ function updateStats() {
 
   $words.textContent = S.wordsDone;
 
-  if (S.wordsDone > 0) {
-    $wpm.textContent = Math.round(S.wordsDone / (mins || 0.0001));
-    const total = S.correct + S.wrong;
-    $acc.textContent = total
-      ? Math.round((S.correct / total) * 100) + "%"
-      : "—";
+  if (S.typedChars > 0) {
+    const wpm = Math.max(0, S.correctChars / 5 / (mins || 0.0001));
+    $wpm.textContent = Math.round(wpm);
+    $acc.textContent = Math.round((S.correctChars / S.typedChars) * 100) + "%";
     [$wpm, $acc, $time, $words].forEach((el) => el.classList.add("live"));
   }
 }
@@ -133,6 +194,9 @@ function loadNextWord() {
 function reset() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
+  stopResultPromptCycle();
+  setPrestartLayout(true);
+  setStatsBarVisible(false);
   Object.assign(S, {
     started: false,
     ended: false,
@@ -150,6 +214,8 @@ function reset() {
     wordsDone: 0,
     correct: 0,
     wrong: 0,
+    typedChars: 0,
+    correctChars: 0,
   });
   $typer.value = "";
   $display.innerHTML = "";
@@ -166,13 +232,16 @@ function reset() {
   $escHint.classList.remove("visible", "flash");
   unlockToolbar();
   $bgOrbs.classList.remove("hide");
-  $hint.innerHTML = 'press <span class="hint-key">enter</span> to start';
+  $hint.innerHTML = `press <span class="hint-key">${START_KEY_LABEL}</span> to start`;
   $hint.classList.remove("hidden");
 }
 
 function endGame() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
+  stopResultPromptCycle();
+  setPrestartLayout(false);
+  setStatsBarVisible(true);
   S.started = false;
   S.ended = true;
   S.timedEnd = null;
@@ -193,19 +262,25 @@ function endGame() {
 
   const elapsed = S.startTime === null ? 0 : performance.now() - S.startTime;
   const mins = elapsed / 60000;
-  const wpm = S.wordsDone > 0 ? Math.round(S.wordsDone / (mins || 0.0001)) : 0;
-  const total = S.correct + S.wrong;
-  const acc = total ? Math.round((S.correct / total) * 100) : 0;
+  const wpm =
+    S.correctChars > 0
+      ? Math.round(Math.max(0, S.correctChars / 5 / (mins || 0.0001)))
+      : 0;
+  const acc =
+    S.typedChars > 0 ? Math.round((S.correctChars / S.typedChars) * 100) : 0;
   $hint.innerHTML =
     `<span class="hint-stat">${wpm} wpm</span>` +
     `<span class="hint-sep">/</span>` +
     `<span class="hint-stat">${acc}%</span>` +
-    `<br><span class="hint-sub">press <span class="hint-key">enter</span> to play again</span>`;
+    '<br><span class="hint-sub hint-sub-cycle"><span id="hint-action-text" class="hint-sub-anim"></span></span>';
   $hint.classList.remove("hidden");
+  startResultPromptCycle();
 }
 
 function start() {
   if (S.started) return;
+  stopResultPromptCycle();
+  setPrestartLayout(false);
   $hint.classList.add("exiting");
   setTimeout(() => {
     $hint.classList.remove("exiting");
@@ -245,6 +320,7 @@ function start() {
       clearReadySequenceTimers();
     }
     S.timerID = setInterval(updateStats, 200);
+    setStatsBarVisible(true);
     lockToolbar();
     $bgOrbs.classList.add("hide");
     resetCtx();
@@ -292,6 +368,15 @@ function skipWord() {
 function submitWord() {
   if (!S.started || S.typed.trim() === "") return;
   const correct = S.typed === S.currentWord;
+  const typedWord = S.typed;
+  const targetWord = S.currentWord;
+  const overlap = Math.min(typedWord.length, targetWord.length);
+  let correctCharsThisWord = 0;
+  for (let i = 0; i < overlap; i++) {
+    if (typedWord[i] === targetWord[i]) correctCharsThisWord++;
+  }
+  S.typedChars += typedWord.length;
+  S.correctChars += correctCharsThisWord;
   if (correct) {
     S.correct++;
     playFeedback(SND.feedback.correct, 0.5);

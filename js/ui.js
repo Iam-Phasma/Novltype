@@ -47,10 +47,17 @@ document.addEventListener("keydown", (e) => {
   if (IGNORE_KEYS.includes(e.key)) return;
   if (!e.repeat) soundFor(e.key, "press");
 
-  if (e.key === "Escape" && S.started) {
-    e.preventDefault();
-    endGame();
-    return;
+  if (e.key === "Escape") {
+    if (S.started) {
+      e.preventDefault();
+      endGame();
+      return;
+    }
+    if (S.ended) {
+      e.preventDefault();
+      reset();
+      return;
+    }
   }
 
   if (!S.started) {
@@ -376,5 +383,9 @@ document.addEventListener("mouseout", (e) => {
 // ══════════════════════════════════════════════════════════════════════
 
 loadPrefs();
+const $initialHintKey = $hint.querySelector(".hint-key");
+if ($initialHintKey && typeof START_KEY_LABEL === "string") {
+  $initialHintKey.textContent = START_KEY_LABEL;
+}
 $display.style.display = "none";
 fetchWordPool();

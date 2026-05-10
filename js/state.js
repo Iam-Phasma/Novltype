@@ -15,6 +15,15 @@ const F = {
   light: false,
 };
 
+function isMacLikePlatform() {
+  const platform =
+    navigator.userAgentData?.platform || navigator.platform || "";
+  const ua = navigator.userAgent || "";
+  return /mac|iphone|ipad|ipod/i.test(`${platform} ${ua}`);
+}
+
+const START_KEY_LABEL = isMacLikePlatform() ? "return" : "enter";
+
 // ══════════════════════════════════════════════════════════════════════
 //  GAME STATE
 // ══════════════════════════════════════════════════════════════════════
@@ -36,6 +45,8 @@ const S = {
   wordsDone: 0,
   correct: 0,
   wrong: 0,
+  typedChars: 0,
+  correctChars: 0,
 };
 
 // ══════════════════════════════════════════════════════════════════════

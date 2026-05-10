@@ -128,6 +128,17 @@ body {
   justify-content: flex-end;
 }
 
+/* Prestart layout: surface game tools below the "press enter to start" hint. */
+#app.prestart .toolbar {
+  position: fixed;
+  top: calc(50% + 96px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 90vw);
+  justify-content: flex-start;
+  z-index: 15;
+}
+
 .tool-group {
   display: flex;
   align-items: center;
@@ -220,13 +231,29 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 4px 26px 4px 10px;
   cursor: pointer;
   white-space: nowrap;
   line-height: 1.4;
+  position: relative;
   transition:
     color 0.12s,
     border-color 0.12s;
+}
+
+.tool-trigger::after {
+  content: "▾";
+  position: absolute;
+  right: 0;
+  width: 26px;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-52%);
+  font-size: 0.96rem;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .tool-trigger:hover {
@@ -512,6 +539,52 @@ body {
   font-size: 0.45em;
   color: var(--dim);
   letter-spacing: 0.06em;
+}
+
+.hint-sub-cycle {
+  min-height: 1.8em;
+}
+
+.hint-sub-anim {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.48em;
+}
+
+.hint-word {
+  display: inline-block;
+  transform: translateY(0.9em) scale(0.97);
+  opacity: 0;
+  filter: blur(1.3px);
+}
+
+.hint-word-key {
+  margin: 0 0.08em;
+}
+
+.hint-sub-anim-live .hint-word {
+  animation: hint-word-dialup 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--widx) * 75ms);
+}
+
+@keyframes hint-word-dialup {
+  0% {
+    transform: translateY(0.9em) scale(0.97);
+    opacity: 0;
+    filter: blur(1.3px);
+  }
+  65% {
+    transform: translateY(-0.08em) scale(1.01);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 .hint-sub .hint-key {
@@ -840,6 +913,12 @@ body.light .tip {
   display: flex;
   gap: 48px;
   align-items: flex-end;
+  transition: opacity 0.22s ease;
+}
+
+.stats-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .stat {
