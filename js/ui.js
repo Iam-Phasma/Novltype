@@ -12,6 +12,7 @@ const $acc = document.getElementById("stat-acc");
 const $time = document.getElementById("stat-time");
 const $words = document.getElementById("stat-words");
 const $btnSound = document.getElementById("btn-sound");
+const $btnSoundTest = document.getElementById("btn-sound-test");
 const $btnTheme = document.getElementById("btn-theme");
 const $btnSettings = document.getElementById("btn-settings");
 const $settingsPanel = document.getElementById("settings-panel");
@@ -80,6 +81,15 @@ $typer.addEventListener("input", () => {
     S.typed = val.trimEnd();
     submitWord();
     return;
+  }
+  const prevTyped = S.typed;
+  if (val.length > prevTyped.length && val.startsWith(prevTyped)) {
+    const idx = val.length - 1;
+    const typedChar = val[idx];
+    const expectedChar = S.currentWord[idx] || "";
+    if (typedChar !== expectedChar) {
+      playFeedback(SND.feedback.wrong, 2.4);
+    }
   }
   S.typed = val;
   renderWord();
@@ -207,7 +217,41 @@ $btnSound.addEventListener("click", () => {
   savePrefs();
   $btnSound.textContent = F.sound ? "on" : "off";
   $btnSound.classList.toggle("active", F.sound);
+  if (F.sound) play(SND.feedback.correct, 1);
 });
+
+function showQuickTip(target, text, ms = 1800) {
+  const r = target.getBoundingClientRect();
+  $tip.textContent = text;
+  const tw = $tip.offsetWidth;
+  let left = r.left + r.width / 2 - tw / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+  const top = r.top - $tip.offsetHeight - 8;
+  $tip.style.left = left + "px";
+  $tip.style.top = (top < 8 ? r.bottom + 8 : top) + "px";
+  $tip.classList.add("visible");
+  setTimeout(() => $tip.classList.remove("visible"), ms);
+}
+
+if ($btnSoundTest) {
+  $btnSoundTest.addEventListener("click", async () => {
+    const testFn = window.testSoundPlayback;
+    if (typeof testFn !== "function") {
+      showQuickTip($btnSoundTest, "sound test unavailable", 2200);
+      return;
+    }
+    const res = await testFn();
+    if (res.ok) {
+      showQuickTip($btnSoundTest, "sound ok", 1300);
+      return;
+    }
+    showQuickTip(
+      $btnSoundTest,
+      "blocked/muted: unmute tab and allow site audio",
+      3200,
+    );
+  });
+}
 
 $btnTheme.addEventListener("click", () => {
   F.light = !F.light;

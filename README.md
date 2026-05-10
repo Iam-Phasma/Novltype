@@ -36,11 +36,11 @@ Then open `http://localhost:8787` in your browser.
 
 ## How to Play
 
-| Key | Action |
-|-----|--------|
-| `Enter` | Start / restart |
-| `Space` | Submit word (type mode) |
-| `Esc` | End session and see results |
+| Key     | Action                      |
+| ------- | --------------------------- |
+| `Enter` | Start / restart             |
+| `Space` | Submit word (type mode)     |
+| `Esc`   | End session and see results |
 
 Words are scored per character. WPM is calculated from actual elapsed time.
 
@@ -67,6 +67,15 @@ Novltype/
 - **Audio** — Web Audio API with gain boosting; `HTMLAudioElement.cloneNode()` for special keys
 - **Word list** — [google-10000-english-no-swears](https://github.com/first20hours/google-10000-english) filtered to `[a-z]{3,14}`
 - **Storage** — `localStorage` key `novltype_prefs`
+
+---
+
+## Sources & Inspiration
+
+- **Word pool** sourced from [google-10000-english-no-swears](https://github.com/first20hours/google-10000-english-no-swears)
+- **Typing practice inspiration** from [Keybr](https://www.keybr.com/) and [Typing.academy](https://www.typing.academy/)
+- **Mechanical key sound style** inspired by NovelKeys Cream keycaps and mechanical keyboard feedback
+- **Vanilla JS approach** intentionally avoids frameworks so the app stays simple and static-host friendly
 
 ---
 

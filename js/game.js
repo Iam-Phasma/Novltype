@@ -197,8 +197,12 @@ function skipWord() {
 function submitWord() {
   if (!S.started || S.typed.trim() === "") return;
   const correct = S.typed === S.currentWord;
-  if (correct) S.correct++;
-  else S.wrong++;
+  if (correct) {
+    S.correct++;
+    playFeedback(SND.feedback.correct, 2.1);
+  } else {
+    S.wrong++;
+  }
   S.wordsDone++;
   if (F.display !== "word") {
     CTX.buf[CTX.cur].typed = S.typed;

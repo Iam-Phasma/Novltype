@@ -27,7 +27,40 @@ function renderWord() {
   }
   if (typed.length >= word.length) html += '<span class="caret"></span>';
 
+  $display.style.fontSize = "";
   $display.innerHTML = html;
+
+  // Measure the actual rendered character spans to detect overflow.
+  // getBoundingClientRect returns true layout position even through overflow:hidden.
+  const _chs = $display.querySelectorAll(".ch");
+  if (_chs.length > 0) {
+    const _r0 = _chs[0].getBoundingClientRect();
+    const _rN = _chs[_chs.length - 1].getBoundingClientRect();
+    const _viewW = document.documentElement.clientWidth;
+    if (_rN.right > _viewW * 0.93 || _r0.left < _viewW * 0.07) {
+      const _wordW = _rN.right - _r0.left;
+      const _targetW = _viewW * 0.86;
+      const _curFs = parseFloat(getComputedStyle($display).fontSize);
+      $display.style.fontSize = Math.floor((_curFs * _targetW) / _wordW) + "px";
+    }
+  }
+}
+
+window.addEventListener("resize", () => {
+  if (S.started) renderWord();
+});
+
+window.addEventListener("orientationchange", () => {
+  if (S.started) renderWord();
+});
+
+if (document.fonts) {
+  document.fonts.ready.then(() => {
+    if (S.started) renderWord();
+  });
+  document.fonts.addEventListener("loadingdone", () => {
+    if (S.started) renderWord();
+  });
 }
 
 // ── Paragraph mode ────────────────────────────────────────────────────

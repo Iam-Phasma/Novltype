@@ -73,10 +73,12 @@ body {
 /* ── App shell ───────────────────────────────────────────────── */
 
 #app {
+  width: 100%;
+  min-width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   position: relative;
   z-index: 1;
@@ -311,7 +313,8 @@ body {
   align-items: center;
   gap: 24px;
   width: 100%;
-  max-width: 860px;
+  max-width: none !important;
+  align-self: stretch;
   padding: 0 32px;
 }
 
@@ -325,9 +328,12 @@ body {
   line-height: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 1.2em;
-  max-width: 100%;
-  overflow: hidden;
+  width: 100%;
+  max-width: none !important;
+  min-width: 0;
+  overflow: visible;
   user-select: none;
 }
 

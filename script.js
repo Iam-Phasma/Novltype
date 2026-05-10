@@ -512,6 +512,10 @@ const SND = {
     enter: _audio(`${SND_ROOT}/release/ENTER.mp3`),
     backspace: _audio(`${SND_ROOT}/release/BACKSPACE.mp3`),
   },
+  feedback: {
+    correct: _audio(`sounds/correct.wav`),
+    wrong: _audio(`sounds/beep.wav`),
+  },
 };
 
 const _actx = new (window.AudioContext || window.webkitAudioContext)();
