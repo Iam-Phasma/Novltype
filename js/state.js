@@ -8,12 +8,12 @@ const F = {
   row: "all", // 'all' | 'top' | 'home' | 'bottom'
   len: "all", // 'all' | 'short' | 'medium' | 'long'
   timedMode: "off", // 'off' | '1min'
-  display: "word", // 'word' | 'paragraph' | 'rise'
+  display: "rise", // 'word' | 'paragraph' | 'rise'
   jump: false, // auto-advance on complete without space
   soundKeys: true,
   soundFx: true,
   wordVoice: false,
-  wordVoiceChoice: "auto",
+  wordVoiceChoice: "zira",
   light: false,
 };
 

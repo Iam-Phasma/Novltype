@@ -201,23 +201,56 @@ function voiceOptionId(voice) {
   return (voice && (voice.voiceURI || voice.name)) || "";
 }
 
-function pickSamanthaVoice(voices) {
+const FEMALE_HINT_RE =
+  /female|woman|susan|victoria|karen|moira|zira|fiona|ava|allison|serena|veena|kathy|kendra|joanna|salli|kimberly|ivy|emma/i;
+const MALE_HINT_RE =
+  /male|man|mark|guy|james|daniel|george|brian|thomas|matthew|andrew|ryan|richard|alex/i;
+
+function uniqVoices(voices) {
+  const dedup = [];
+  const seen = new Set();
+  (voices || []).forEach((voice) => {
+    const id = voiceOptionId(voice);
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    dedup.push(voice);
+  });
+  return dedup;
+}
+
+function shortVoiceName(voice) {
+  return String((voice && voice.name) || "voice")
+    .replace(/^Microsoft\s+/i, "")
+    .replace(/\s*Desktop\s*-/i, " Desktop ")
+    .replace(/\s*\(United States\)\s*/i, "")
+    .replace(/\s*-\s*English\s*/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function pickDefaultVoice(voices) {
   if (!voices || voices.length === 0) return null;
 
   const byNameEq = voices.find(
-    (v) => v.name && v.name.toLowerCase() === "samantha",
+    (v) => v.name && v.name.toLowerCase() === "zira",
   );
   if (byNameEq) return byNameEq;
 
   const byNameIncludes = voices.find(
-    (v) => v.name && v.name.toLowerCase().includes("samantha"),
+    (v) =>
+      v.name &&
+      v.name.toLowerCase().includes("zira") &&
+      !v.name.toLowerCase().includes("desktop"),
   );
   if (byNameIncludes) return byNameIncludes;
 
-  const femaleHint =
-    /female|woman|samantha|susan|victoria|karen|moira|zira|fiona|ava/i;
+  const byZiraDesktop = voices.find(
+    (v) => v.name && v.name.toLowerCase().includes("zira"),
+  );
+  if (byZiraDesktop) return byZiraDesktop;
+
   const femaleEn = voices.find(
-    (v) => femaleHint.test(v.name || "") && /en/i.test(v.lang || ""),
+    (v) => FEMALE_HINT_RE.test(v.name || "") && /en/i.test(v.lang || ""),
   );
   if (femaleEn) return femaleEn;
 
@@ -229,27 +262,45 @@ function pickSamanthaVoice(voices) {
 
 function getFemaleWordVoices(voices) {
   if (!voices || voices.length === 0) return [];
-  const femaleHint =
-    /female|woman|samantha|susan|victoria|karen|moira|zira|fiona|ava|allison|serena|veena|kathy|kendra|joanna|salli|kimberly|ivy|emma/i;
-
-  const dedup = [];
-  const seen = new Set();
-  voices.forEach((voice) => {
-    const id = voiceOptionId(voice);
-    if (!id || seen.has(id)) return;
-    seen.add(id);
-    dedup.push(voice);
-  });
-
-  const female = dedup.filter((v) => femaleHint.test(v.name || ""));
+  const dedup = uniqVoices(voices);
+  const female = dedup.filter((v) => FEMALE_HINT_RE.test(v.name || ""));
   const femaleEn = female.filter((v) => /en/i.test(v.lang || ""));
   if (femaleEn.length > 0) return femaleEn;
   if (female.length > 0) return female;
+  return [];
+}
 
-  const anyEn = dedup.filter((v) => /en/i.test(v.lang || ""));
-  if (anyEn.length > 0) return anyEn;
+function getMaleWordVoices(voices) {
+  if (!voices || voices.length === 0) return [];
+  const dedup = uniqVoices(voices);
+  const male = dedup.filter((v) => MALE_HINT_RE.test(v.name || ""));
+  const maleEn = male.filter((v) => /en/i.test(v.lang || ""));
 
-  return dedup;
+  const prioritized = (maleEn.length > 0 ? maleEn : male).filter(
+    (v) => !/david/i.test(v.name || ""),
+  );
+
+  const mark = prioritized.find((v) => /mark/i.test(v.name || ""));
+  if (mark) return [mark];
+
+  if (prioritized.length > 0) {
+    prioritized.sort((a, b) => {
+      const pref = /guy|james|daniel|george|brian|thomas/i;
+      const sa = pref.test(a.name || "") ? 1 : 0;
+      const sb = pref.test(b.name || "") ? 1 : 0;
+      return sb - sa;
+    });
+    return prioritized.slice(0, 1);
+  }
+
+  const fallbackEn = dedup.filter(
+    (v) =>
+      /en/i.test(v.lang || "") &&
+      !/david/i.test(v.name || "") &&
+      !FEMALE_HINT_RE.test(v.name || "") &&
+      !MALE_HINT_RE.test(v.name || ""),
+  );
+  return fallbackEn.slice(0, 1);
 }
 
 function pickWordVoice(voices, choice) {
@@ -258,25 +309,39 @@ function pickWordVoice(voices, choice) {
     const exact = voices.find((v) => voiceOptionId(v) === choice);
     if (exact) return exact;
   }
-  return pickSamanthaVoice(voices);
+  return pickDefaultVoice(voices);
 }
 
 function getWordSpeechVoiceOptions() {
-  const options = [{ id: "auto", label: "auto (samantha first)" }];
+  const options = [{ id: "auto", label: "auto" }];
   if (!isWordSpeechAvailable()) return options;
 
   if (_ttsVoices.length === 0) {
     _ttsVoices = window.speechSynthesis.getVoices() || [];
     _preferredTtsVoice = pickWordVoice(_ttsVoices, _wordVoiceChoice);
   }
+  const seen = new Set(["auto"]);
+
   getFemaleWordVoices(_ttsVoices).forEach((voice) => {
     const id = voiceOptionId(voice);
-    if (!id) return;
+    if (!id || seen.has(id)) return;
+    seen.add(id);
     options.push({
       id,
-      label: `${voice.name || "voice"} (${voice.lang || "unknown"})`,
+      label: shortVoiceName(voice),
     });
   });
+
+  getMaleWordVoices(_ttsVoices).forEach((voice) => {
+    const id = voiceOptionId(voice);
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    options.push({
+      id,
+      label: shortVoiceName(voice),
+    });
+  });
+
   return options;
 }
 

@@ -26,6 +26,7 @@ const $tip = document.getElementById("tip");
 // ── Idle timer ────────────────────────────────────────────────────────
 
 let _idleTimer = null;
+let _resultEscTimer = null;
 
 function resetIdleTimer() {
   clearTimeout(_idleTimer);
@@ -39,6 +40,21 @@ function resetIdleTimer() {
   }, 5000);
 }
 
+function resetFromResultWithAnimation() {
+  if (!S.ended) {
+    reset();
+    return;
+  }
+  if ($hint.classList.contains("exiting")) return;
+  $hint.classList.add("exiting");
+  clearTimeout(_resultEscTimer);
+  _resultEscTimer = setTimeout(() => {
+    $hint.classList.remove("exiting");
+    if (S.ended) reset();
+    _resultEscTimer = null;
+  }, 280);
+}
+
 // ══════════════════════════════════════════════════════════════════════
 //  KEYBOARD INPUT
 // ══════════════════════════════════════════════════════════════════════
@@ -50,6 +66,10 @@ document.addEventListener("keydown", (e) => {
   if (!e.repeat) soundFor(e.key, "press");
 
   if (e.key === "Escape") {
+    if (e.repeat) {
+      e.preventDefault();
+      return;
+    }
     if (S.started) {
       e.preventDefault();
       endGame();
@@ -57,7 +77,7 @@ document.addEventListener("keydown", (e) => {
     }
     if (S.ended) {
       e.preventDefault();
-      reset();
+      resetFromResultWithAnimation();
       return;
     }
   }
@@ -115,6 +135,19 @@ $typer.addEventListener("input", () => {
 
 $typer.addEventListener("keydown", (e) => {
   if (!S.started) return;
+
+  // Block auto-repeat so holding a key does not spam characters/submits.
+  if (
+    e.repeat &&
+    (e.key.length === 1 ||
+      e.key === "Backspace" ||
+      e.key === " " ||
+      e.key === "Enter")
+  ) {
+    e.preventDefault();
+    return;
+  }
+
   if (e.key === "Enter") {
     e.preventDefault();
     if (F.jump) {
@@ -215,7 +248,7 @@ function refreshVoiceSelector() {
     return;
   }
 
-  let options = [{ id: "auto", label: "auto (samantha first)" }];
+  let options = [{ id: "auto", label: "auto" }];
   if (typeof getWordSpeechVoiceOptions === "function") {
     const fetched = getWordSpeechVoiceOptions();
     if (Array.isArray(fetched) && fetched.length > 0) {
@@ -234,10 +267,30 @@ function refreshVoiceSelector() {
     $selVoice.appendChild(opt);
   });
 
-  const selected =
+  let selected =
     typeof F.wordVoiceChoice === "string" && seen.has(F.wordVoiceChoice)
       ? F.wordVoiceChoice
       : "auto";
+
+  if (selected === "auto" && F.wordVoiceChoice === "zira") {
+    const ziraPrimary = options.find(
+      (entry) =>
+        entry &&
+        entry.id &&
+        entry.id !== "auto" &&
+        /^zira/i.test((entry.label || "").trim()) &&
+        !/desktop/i.test(entry.label || ""),
+    );
+    const ziraAny = options.find(
+      (entry) =>
+        entry &&
+        entry.id &&
+        entry.id !== "auto" &&
+        /^zira/i.test((entry.label || "").trim()),
+    );
+    selected = (ziraPrimary || ziraAny || { id: "auto" }).id;
+  }
+
   F.wordVoiceChoice = selected;
   $selVoice.value = selected;
   $selVoice.disabled = false;

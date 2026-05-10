@@ -156,7 +156,7 @@
           <span class="spanel-label">display</span>
           <div class="spanel-group" id="sp-display">
             <button
-              class="spanel-btn active"
+              class="spanel-btn"
               data-val="word"
               data-tip="One word at a time"
             >
@@ -170,7 +170,7 @@
               paragraph
             </button>
             <button
-              class="spanel-btn"
+              class="spanel-btn active"
               data-val="rise"
               data-tip="Words rise up as you type through them"
             >
@@ -233,7 +233,7 @@
           <button
             class="spanel-toggle"
             id="btn-voice"
-            data-tip="Speak each next word (prefers Samantha voice)"
+            data-tip="Speak each next word (defaults to Zira)"
           >
             off
           </button>
@@ -245,9 +245,9 @@
             class="spanel-select"
             title="Voice speaker"
             aria-label="Voice speaker"
-            data-tip="Pick a female voice (auto prefers Samantha)"
+            data-tip="Pick a voice (auto uses Zira)"
           >
-            <option value="auto">auto (samantha first)</option>
+            <option value="zira">Zira</option>
           </select>
         </div>
         <div class="spanel-row">
@@ -265,11 +265,11 @@
 
     <div class="tip" id="tip"></div>
     <script src="js/words.js?v=29"></script>
-    <script src="js/state.js?v=29"></script>
-    <script src="js/sounds.js?v=29"></script>
+    <script src="js/state.js?v=30"></script>
+    <script src="js/sounds.js?v=33"></script>
     <script src="js/render.js?v=29"></script>
     <script src="js/game.js?v=29"></script>
-    <script src="js/ui.js?v=29"></script>
+    <script src="js/ui.js?v=34"></script>
     <script src="js/bg-grid.js?v=29"></script>
   </body>
 </html>
