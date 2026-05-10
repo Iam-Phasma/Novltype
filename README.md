@@ -73,7 +73,8 @@ Novltype/
 ## Sources & Inspiration
 
 - **Word pool** sourced from [google-10000-english-no-swears](https://github.com/first20hours/google-10000-english-no-swears)
-- **Typing practice inspiration** from [Keybr](https://www.keybr.com/) and [Typing.academy](https://www.typing.academy/)
+- **Audio reference** from [tplai/kbsim](https://github.com/tplai/kbsim)
+- **Feedback sound reference** from [RealKai42/qwerty-learner](https://github.com/RealKai42/qwerty-learner)
 - **Mechanical key sound style** inspired by NovelKeys Cream keycaps and mechanical keyboard feedback
 - **Vanilla JS approach** intentionally avoids frameworks so the app stays simple and static-host friendly
 
