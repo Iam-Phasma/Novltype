@@ -1,6 +1,6 @@
 # Novltype.
 
-A minimal, keyboard-first typing trainer built with vanilla HTML, CSS, and JavaScript. No frameworks, no build step.
+A minimal, keyboard-first typing trainer built with vanilla HTML, CSS, and JavaScript.
 
 ---
 
