@@ -129,6 +129,7 @@ function renderParagraph() {
 // ── Rise mode ─────────────────────────────────────────────────────────
 
 let _animateRise = false;
+let _riseAnimating = false;
 let _riseTrack = null;
 
 function riseRowHtml(wi) {
@@ -172,31 +173,40 @@ function renderRise() {
     _riseTrack = $display.querySelector(".rise-track");
     buildRiseTrack();
     _animateRise = false;
+    _riseAnimating = false;
     return;
   }
 
   if (_animateRise) {
     _animateRise = false;
     const rows = _riseTrack.querySelectorAll(".rise-row");
-    if (rows.length >= 3) {
-      rows[1].className = "rise-row rise-near";
-      rows[1].innerHTML = riseRowHtml(CTX.cur - 1);
-      rows[2].className = "rise-row rise-current";
-      rows[2].innerHTML = riseRowHtml(CTX.cur);
-      const newRow = document.createElement("div");
-      newRow.className = "rise-row rise-near";
-      newRow.innerHTML = riseRowHtml(CTX.cur + 1);
-      _riseTrack.appendChild(newRow);
-      requestAnimationFrame(() => {
-        _riseTrack.style.transition = "transform 0.2s ease-in-out";
-        _riseTrack.style.transform = "translateY(-8rem)";
-        setTimeout(() => {
-          _riseTrack.style.transition = "none";
-          _riseTrack.style.transform = "";
-          rows[0].remove();
-        }, 215);
-      });
+    // If a previous animation is still mid-flight (extra rows present), rebuild cleanly
+    if (_riseAnimating || rows.length !== 3) {
+      _riseAnimating = false;
+      _riseTrack.style.transition = "none";
+      _riseTrack.style.transform = "";
+      buildRiseTrack();
+      return;
     }
+    _riseAnimating = true;
+    rows[1].className = "rise-row rise-near";
+    rows[1].innerHTML = riseRowHtml(CTX.cur - 1);
+    rows[2].className = "rise-row rise-current";
+    rows[2].innerHTML = riseRowHtml(CTX.cur);
+    const newRow = document.createElement("div");
+    newRow.className = "rise-row rise-near";
+    newRow.innerHTML = riseRowHtml(CTX.cur + 1);
+    _riseTrack.appendChild(newRow);
+    requestAnimationFrame(() => {
+      _riseTrack.style.transition = "transform 0.2s ease-in-out";
+      _riseTrack.style.transform = "translateY(-8rem)";
+      setTimeout(() => {
+        _riseTrack.style.transition = "none";
+        _riseTrack.style.transform = "";
+        rows[0].remove();
+        _riseAnimating = false;
+      }, 215);
+    });
     return;
   }
 
