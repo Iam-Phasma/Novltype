@@ -337,6 +337,51 @@ body {
   user-select: none;
 }
 
+.word-inline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.timed-ready-dots {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  margin-right: 14px;
+  transform: translateY(-45%);
+  width: 84px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timed-ready-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--correct);
+  opacity: 1;
+}
+
+.timed-ready-dots .dot.off {
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.timed-ready-dots.blink-odd .dot:not(.off),
+.timed-ready-dots.blink-even .dot:not(.off) {
+  animation: ready-blink 0.32s ease-out 1 forwards;
+}
+
+@keyframes ready-blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
 .ch {
   display: inline-block;
   color: var(--dim);

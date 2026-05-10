@@ -27,6 +27,26 @@ function renderWord() {
   }
   if (typed.length >= word.length) html += '<span class="caret"></span>';
 
+  const timedReady = S.started && S.timerArmed && F.timedMode !== "off";
+  const readyDots = Math.max(0, Math.min(5, Number(S.readyDots ?? 5)));
+  const readyDotsHtml = Array.from(
+    { length: 5 },
+    (_, i) => `<span class="dot${i < readyDots ? "" : " off"}"></span>`,
+  ).join("");
+  const blinkClass =
+    S.readyBlinkActive && S.readyBlinkTick > 0
+      ? S.readyBlinkTick % 2 === 0
+        ? " blink-even"
+        : " blink-odd"
+      : "";
+  html =
+    `<span class="word-inline${timedReady ? " with-ready" : ""}">` +
+    (timedReady
+      ? `<span class="timed-ready-dots${blinkClass}" aria-hidden="true">${readyDotsHtml}</span>`
+      : "") +
+    html +
+    "</span>";
+
   $display.style.fontSize = "";
   $display.innerHTML = html;
 

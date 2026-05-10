@@ -77,6 +77,7 @@ $typer.addEventListener("input", () => {
   if (!S.started) return;
   resetIdleTimer();
   const val = $typer.value;
+  if (S.timerArmed && val.length > 0) startTimedCountdownIfArmed();
   if (val.endsWith(" ")) {
     $typer.value = "";
     S.typed = val.trimEnd();
