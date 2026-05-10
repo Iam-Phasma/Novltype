@@ -410,11 +410,49 @@ body {
   color: var(--dim);
   transition: color 0.04s;
 }
+.ch-anchor {
+  position: relative;
+  display: inline-block;
+}
 .ch.correct {
   color: var(--correct);
 }
 .ch.wrong {
   color: var(--wrong);
+}
+
+.wrong-pop {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  color: var(--wrong);
+  font-size: 0.3em;
+  line-height: 1;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  animation: wrong-pop-float 0.8s ease-out forwards;
+}
+
+@keyframes wrong-pop-float {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.34em) scale(0.9);
+  }
+  16% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0.04em) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-0.22em) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-0.48em) scale(0.98);
+  }
 }
 
 .caret {
@@ -869,6 +907,9 @@ body.light .tip {
   line-height: 1.9;
   width: 100%;
   max-width: 800px;
+  box-sizing: border-box;
+  padding-top: 0.9em;
+  padding-bottom: 0.4em;
   /* cap to the safe zone between topbar (~70px) and stats bar (~100px) */
   height: calc(100vh - 200px);
   overflow-y: scroll;

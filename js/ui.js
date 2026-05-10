@@ -14,6 +14,7 @@ const $words = document.getElementById("stat-words");
 const $btnSound = document.getElementById("btn-sound");
 const $btnSoundFx = document.getElementById("btn-sound-fx");
 const $btnSoundTest = document.getElementById("btn-sound-test");
+const $btnStrictKey = document.getElementById("btn-strict-key");
 const $btnVoice = document.getElementById("btn-voice");
 const $selVoice = document.getElementById("sel-voice");
 const $btnTheme = document.getElementById("btn-theme");
@@ -105,29 +106,103 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
+function sanitizeStrictTyped(rawVal, targetWord) {
+  let accepted = "";
+  let mismatchIndex = -1;
+  let mismatchChar = "";
+  const limit = Math.min(rawVal.length, targetWord.length);
+
+  for (let i = 0; i < limit; i++) {
+    if (rawVal[i] !== targetWord[i]) {
+      mismatchIndex = i;
+      mismatchChar = rawVal[i];
+      break;
+    }
+    accepted += rawVal[i];
+  }
+
+  if (mismatchIndex < 0 && rawVal.length > targetWord.length) {
+    mismatchIndex = targetWord.length;
+    mismatchChar = rawVal[targetWord.length] || "";
+  }
+
+  if (mismatchIndex < 0 && rawVal.length <= targetWord.length) {
+    accepted = rawVal;
+  }
+
+  return {
+    typed: accepted,
+    mismatchIndex,
+    mismatchChar,
+  };
+}
+
 $typer.addEventListener("input", () => {
   if (!S.started) return;
   resetIdleTimer();
-  const val = $typer.value;
-  if (S.timerArmed && val.length > 0) startTimedCountdownIfArmed();
-  if (val.endsWith(" ")) {
-    $typer.value = "";
-    S.typed = val.trimEnd();
-    submitWord();
-    return;
-  }
+  const rawVal = $typer.value;
+  if (S.timerArmed && rawVal.length > 0) startTimedCountdownIfArmed();
+  const wantsSubmit = rawVal.endsWith(" ");
   const prevTyped = S.typed;
-  if (val.length > prevTyped.length && val.startsWith(prevTyped)) {
-    const idx = val.length - 1;
-    const typedChar = val[idx];
-    const expectedChar = S.currentWord[idx] || "";
-    if (typedChar !== expectedChar) {
+  let nextTyped = rawVal;
+
+  if (F.strictKey) {
+    const baseVal = wantsSubmit ? rawVal.trimEnd() : rawVal;
+    const strictResult = sanitizeStrictTyped(baseVal, S.currentWord);
+    nextTyped = strictResult.typed;
+
+    if (strictResult.mismatchChar) {
+      if (
+        strictResult.mismatchIndex >= 0 &&
+        strictResult.mismatchIndex < S.currentWord.length &&
+        typeof registerWrongPop === "function"
+      ) {
+        registerWrongPop(strictResult.mismatchIndex, strictResult.mismatchChar);
+      }
       playFeedback(SND.feedback.wrong, 2.4);
     }
+
+    if (wantsSubmit) {
+      if (nextTyped === S.currentWord) {
+        $typer.value = "";
+        S.typed = nextTyped;
+        submitWord();
+        return;
+      }
+      $typer.value = nextTyped;
+      S.typed = nextTyped;
+      renderWord();
+      return;
+    }
+
+    if (nextTyped !== rawVal) $typer.value = nextTyped;
+  } else {
+    if (wantsSubmit) {
+      $typer.value = "";
+      S.typed = rawVal.trimEnd();
+      submitWord();
+      return;
+    }
+
+    if (rawVal.length > prevTyped.length && rawVal.startsWith(prevTyped)) {
+      const idx = rawVal.length - 1;
+      const typedChar = rawVal[idx];
+      const expectedChar = S.currentWord[idx] || "";
+      if (typedChar !== expectedChar) {
+        if (
+          idx < S.currentWord.length &&
+          typeof registerWrongPop === "function"
+        ) {
+          registerWrongPop(idx, typedChar);
+        }
+        playFeedback(SND.feedback.wrong, 2.4);
+      }
+    }
   }
-  S.typed = val;
+
+  S.typed = nextTyped;
   renderWord();
-  if (F.jump && val.length >= S.currentWord.length) {
+  if (F.jump && nextTyped.length >= S.currentWord.length) {
     $typer.value = "";
     submitWord();
   }
@@ -150,12 +225,29 @@ $typer.addEventListener("keydown", (e) => {
 
   if (e.key === "Enter") {
     e.preventDefault();
+    const typedNow = $typer.value.trimEnd();
     if (F.jump) {
+      if (F.strictKey) {
+        if (typedNow !== S.currentWord) return;
+        S.typed = typedNow;
+        $typer.value = "";
+        submitWord();
+        return;
+      }
+      if (typedNow.length === 0) return;
       $typer.value = "";
       skipWord();
       return;
     }
-    S.typed = $typer.value.trimEnd();
+
+    if (F.strictKey && typedNow !== S.currentWord) {
+      S.typed = typedNow;
+      $typer.value = typedNow;
+      renderWord();
+      return;
+    }
+
+    S.typed = typedNow;
     $typer.value = "";
     submitWord();
   }
@@ -227,6 +319,24 @@ function applyTimedMode(val) {
 function closeSettingsPanel() {
   $settingsPanel.classList.remove("open");
   $btnSettings.classList.remove("open");
+}
+
+const SETTINGS_CLOSE_DISTANCE_PX = 150;
+
+function isPointerFarFromSettings(clientX, clientY) {
+  const panelRect = $settingsPanel.getBoundingClientRect();
+  const btnRect = $btnSettings.getBoundingClientRect();
+
+  const minX = Math.min(panelRect.left, btnRect.left);
+  const maxX = Math.max(panelRect.right, btnRect.right);
+  const minY = Math.min(panelRect.top, btnRect.top);
+  const maxY = Math.max(panelRect.bottom, btnRect.bottom);
+
+  const dx =
+    clientX < minX ? minX - clientX : clientX > maxX ? clientX - maxX : 0;
+  const dy =
+    clientY < minY ? minY - clientY : clientY > maxY ? clientY - maxY : 0;
+  return Math.hypot(dx, dy) > SETTINGS_CLOSE_DISTANCE_PX;
 }
 
 function refreshVoiceSelector() {
@@ -310,6 +420,11 @@ document.addEventListener("click", () => {
 
 $settingsPanel.addEventListener("click", (e) => e.stopPropagation());
 
+document.addEventListener("mousemove", (e) => {
+  if (!$settingsPanel.classList.contains("open")) return;
+  if (isPointerFarFromSettings(e.clientX, e.clientY)) closeSettingsPanel();
+});
+
 document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (S.started) return;
@@ -320,7 +435,6 @@ document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
     F.display = btn.dataset.val;
     savePrefs();
     if (S.started || S.ended) reset();
-    closeSettingsPanel();
   });
 });
 
@@ -333,9 +447,18 @@ document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
     btn.classList.add("active");
     F.jump = btn.dataset.val === "on";
     savePrefs();
-    closeSettingsPanel();
   });
 });
+
+if ($btnStrictKey) {
+  $btnStrictKey.addEventListener("click", () => {
+    if (S.started) return;
+    F.strictKey = !F.strictKey;
+    savePrefs();
+    $btnStrictKey.textContent = F.strictKey ? "on" : "off";
+    $btnStrictKey.classList.toggle("active", F.strictKey);
+  });
+}
 
 $btnSound.addEventListener("click", () => {
   if (S.started) return;
@@ -344,7 +467,6 @@ $btnSound.addEventListener("click", () => {
   $btnSound.textContent = F.soundKeys ? "on" : "off";
   $btnSound.classList.toggle("active", F.soundKeys);
   if (F.soundKeys) play(SND.press.enter, 1.4);
-  closeSettingsPanel();
 });
 
 if ($btnSoundFx) {
@@ -355,7 +477,6 @@ if ($btnSoundFx) {
     $btnSoundFx.textContent = F.soundFx ? "on" : "off";
     $btnSoundFx.classList.toggle("active", F.soundFx);
     if (F.soundFx) playFeedback(SND.feedback.correct, 0.6);
-    closeSettingsPanel();
   });
 }
 
@@ -382,7 +503,6 @@ if ($btnVoice) {
     if (!F.wordVoice && typeof stopWordSpeech === "function") {
       stopWordSpeech();
     }
-    closeSettingsPanel();
   });
 }
 
@@ -404,7 +524,6 @@ if ($selVoice) {
     if (F.wordVoice && S.started && typeof speakWordText === "function") {
       speakWordText(S.currentWord);
     }
-    closeSettingsPanel();
   });
 }
 
@@ -453,7 +572,6 @@ $btnTheme.addEventListener("click", () => {
   document.body.classList.toggle("light", F.light);
   $btnTheme.textContent = F.light ? "dark" : "light";
   $btnTheme.classList.toggle("active", F.light);
-  closeSettingsPanel();
 });
 
 // ══════════════════════════════════════════════════════════════════════
@@ -475,9 +593,11 @@ function loadPrefs() {
   } catch (_) {}
   if (!saved) return;
 
-  ["row", "len", "timedMode", "display", "jump", "light"].forEach((k) => {
-    if (k in saved) F[k] = saved[k];
-  });
+  ["row", "len", "timedMode", "display", "jump", "strictKey", "light"].forEach(
+    (k) => {
+      if (k in saved) F[k] = saved[k];
+    },
+  );
 
   // Backward compatibility: migrate legacy unified sound preference.
   if ("soundKeys" in saved) F.soundKeys = saved.soundKeys;
@@ -505,6 +625,11 @@ function loadPrefs() {
   document.querySelectorAll("#sp-jump .spanel-btn").forEach((b) => {
     b.classList.toggle("active", b.dataset.val === (F.jump ? "on" : "type"));
   });
+
+  if ($btnStrictKey) {
+    $btnStrictKey.textContent = F.strictKey ? "on" : "off";
+    $btnStrictKey.classList.toggle("active", F.strictKey);
+  }
 
   if ($btnSound) {
     $btnSound.textContent = F.soundKeys ? "on" : "off";

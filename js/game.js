@@ -148,7 +148,7 @@ function updateStats() {
 // ══════════════════════════════════════════════════════════════════════
 
 const LOCKABLE = ["tg-row", "tg-len", "tg-time"];
-const LOCKABLE_SPANEL = ["sp-display", "sp-jump"];
+const LOCKABLE_SPANEL = ["sp-display", "sp-jump", "sp-strict"];
 
 function lockToolbar() {
   document
@@ -186,6 +186,7 @@ function unlockToolbar() {
 // ══════════════════════════════════════════════════════════════════════
 
 function loadNextWord() {
+  if (typeof clearWrongPops === "function") clearWrongPops();
   if (F.display === "paragraph") {
     ensureParaBuf();
     S.currentWord = CTX.buf[CTX.cur].text;
@@ -205,6 +206,7 @@ function reset() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
   stopResultPromptCycle();
+  if (typeof clearWrongPops === "function") clearWrongPops();
   if (typeof stopWordSpeech === "function") stopWordSpeech();
   setPrestartLayout(true);
   setStatsBarVisible(false);
@@ -251,6 +253,7 @@ function endGame() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
   stopResultPromptCycle();
+  if (typeof clearWrongPops === "function") clearWrongPops();
   if (typeof stopWordSpeech === "function") stopWordSpeech();
   setPrestartLayout(false);
   setStatsBarVisible(true);

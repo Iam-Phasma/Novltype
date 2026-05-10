@@ -10,6 +10,7 @@ const F = {
   timedMode: "off", // 'off' | '1min'
   display: "rise", // 'word' | 'paragraph' | 'rise'
   jump: false, // auto-advance on complete without space
+  strictKey: false, // require correct next letter before progressing
   soundKeys: true,
   soundFx: true,
   wordVoice: false,

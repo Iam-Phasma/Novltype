@@ -4,6 +4,89 @@
 //  RENDER  — word, paragraph, rise display modes
 // ══════════════════════════════════════════════════════════════════════
 
+const WRONG_POP_MS = 800;
+let _wrongPopSeq = 0;
+let _wrongPopEvents = [];
+let _wrongPopTimer = null;
+
+function escapeHtmlChar(ch) {
+  return String(ch)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function pruneWrongPopEvents(now = performance.now()) {
+  _wrongPopEvents = _wrongPopEvents.filter(
+    (evt) => now - evt.createdAt < WRONG_POP_MS,
+  );
+}
+
+function scheduleWrongPopCleanup() {
+  clearTimeout(_wrongPopTimer);
+  if (_wrongPopEvents.length === 0) {
+    _wrongPopTimer = null;
+    return;
+  }
+
+  const now = performance.now();
+  let nextExpiryAt = Infinity;
+  for (const evt of _wrongPopEvents) {
+    nextExpiryAt = Math.min(nextExpiryAt, evt.createdAt + WRONG_POP_MS);
+  }
+  const waitMs = Math.max(0, Math.ceil(nextExpiryAt - now));
+
+  _wrongPopTimer = setTimeout(() => {
+    pruneWrongPopEvents();
+    if (S.started) renderWord();
+    scheduleWrongPopCleanup();
+  }, waitMs);
+}
+
+function registerWrongPop(index, typedChar) {
+  if (typeof index !== "number" || index < 0 || !typedChar) return;
+  const now = performance.now();
+  pruneWrongPopEvents(now);
+  _wrongPopEvents.push({
+    id: ++_wrongPopSeq,
+    index,
+    typedChar,
+    createdAt: now,
+  });
+  scheduleWrongPopCleanup();
+}
+
+function clearWrongPops() {
+  _wrongPopEvents = [];
+  clearTimeout(_wrongPopTimer);
+  _wrongPopTimer = null;
+}
+
+function getWrongPopByIndex(now = performance.now()) {
+  pruneWrongPopEvents(now);
+  const byIndex = new Map();
+  for (const evt of _wrongPopEvents) byIndex.set(evt.index, evt);
+  return byIndex;
+}
+
+function renderActiveChar(ch, cls, idx, wrongPopByIndex, now) {
+  const evt = wrongPopByIndex.get(idx);
+  const typed = escapeHtmlChar(ch);
+  if (!evt)
+    return `<span class="ch-anchor"><span class="${cls}">${typed}</span></span>`;
+
+  const elapsed = Math.max(0, Math.min(WRONG_POP_MS, now - evt.createdAt));
+  const delay = Math.round(elapsed);
+  return (
+    `<span class="ch-anchor">` +
+    `<span class="${cls}">${typed}</span>` +
+    `<span class="wrong-pop" style="animation-delay:-${delay}ms">${escapeHtmlChar(evt.typedChar)}</span>` +
+    `</span>`
+  );
+}
+
 function renderWord() {
   if (F.display === "paragraph") {
     renderParagraph();
@@ -17,13 +100,15 @@ function renderWord() {
   $display.className = "word-display";
   const word = S.currentWord;
   const typed = S.typed;
+  const now = performance.now();
+  const wrongPopByIndex = getWrongPopByIndex(now);
   let html = "";
 
   for (let i = 0; i < word.length; i++) {
     if (i === typed.length) html += '<span class="caret"></span>';
     let cls = "ch";
     if (i < typed.length) cls += typed[i] === word[i] ? " correct" : " wrong";
-    html += `<span class="${cls}">${word[i]}</span>`;
+    html += renderActiveChar(word[i], cls, i, wrongPopByIndex, now);
   }
   if (typed.length >= word.length) html += '<span class="caret"></span>';
 
@@ -90,6 +175,8 @@ function renderParagraph() {
   ensureParaBuf();
   const start = CTX.paraStart;
   const end = start + getParaSize();
+  const now = performance.now();
+  const wrongPopByIndex = getWrongPopByIndex(now);
   let html = "";
 
   for (let wi = start; wi < end; wi++) {
@@ -106,7 +193,7 @@ function renderParagraph() {
         let cls2 = "ch";
         if (i < S.typed.length)
           cls2 += S.typed[i] === w.text[i] ? " correct" : " wrong";
-        html += `<span class="${cls2}">${w.text[i]}</span>`;
+        html += renderActiveChar(w.text[i], cls2, i, wrongPopByIndex, now);
       }
       if (S.typed.length >= w.text.length)
         html += '<span class="caret"></span>';
@@ -122,7 +209,7 @@ function renderParagraph() {
   if ($cur) {
     const dispRect = $display.getBoundingClientRect();
     const curRect = $cur.getBoundingClientRect();
-    $display.scrollTop += curRect.top - dispRect.top - dispRect.height * 0.3;
+    $display.scrollTop += curRect.top - dispRect.top - dispRect.height * 0.38;
   }
 }
 
@@ -135,6 +222,8 @@ let _riseTrack = null;
 function riseRowHtml(wi) {
   if (wi < 0 || wi >= CTX.buf.length) return "";
   const w = CTX.buf[wi];
+  const now = performance.now();
+  const wrongPopByIndex = getWrongPopByIndex(now);
   let html = "";
   if (wi < CTX.cur) {
     for (let i = 0; i < w.text.length; i++)
@@ -142,7 +231,8 @@ function riseRowHtml(wi) {
   } else if (wi === CTX.cur) {
     for (let i = 0; i < w.text.length; i++) {
       if (i === S.typed.length) html += '<span class="caret"></span>';
-      html += `<span class="ch${i < S.typed.length ? (S.typed[i] === w.text[i] ? " correct" : " wrong") : ""}">${w.text[i]}</span>`;
+      const cls = `ch${i < S.typed.length ? (S.typed[i] === w.text[i] ? " correct" : " wrong") : ""}`;
+      html += renderActiveChar(w.text[i], cls, i, wrongPopByIndex, now);
     }
     if (S.typed.length >= w.text.length) html += '<span class="caret"></span>';
   } else {
