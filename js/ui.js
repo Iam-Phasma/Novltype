@@ -14,6 +14,8 @@ const $words = document.getElementById("stat-words");
 const $btnSound = document.getElementById("btn-sound");
 const $btnSoundFx = document.getElementById("btn-sound-fx");
 const $btnSoundTest = document.getElementById("btn-sound-test");
+const $btnVoice = document.getElementById("btn-voice");
+const $selVoice = document.getElementById("sel-voice");
 const $btnTheme = document.getElementById("btn-theme");
 const $btnSettings = document.getElementById("btn-settings");
 const $settingsPanel = document.getElementById("settings-panel");
@@ -160,6 +162,7 @@ function bindDropdown(groupId, stateKey, prefix, onApply) {
 
   document.querySelectorAll(`#${groupId} .tool-opt`).forEach((btn) => {
     btn.addEventListener("click", () => {
+      if (S.started) return;
       apply(btn.dataset.val);
       btn.blur();
     });
@@ -193,7 +196,56 @@ function closeSettingsPanel() {
   $btnSettings.classList.remove("open");
 }
 
+function refreshVoiceSelector() {
+  if (!$selVoice) return;
+
+  const speechAvailable =
+    typeof isWordSpeechAvailable === "function" && isWordSpeechAvailable();
+
+  if (!speechAvailable) {
+    $selVoice.innerHTML = "";
+    const opt = document.createElement("option");
+    opt.value = "auto";
+    opt.textContent = "speech unavailable";
+    $selVoice.appendChild(opt);
+    $selVoice.value = "auto";
+    $selVoice.disabled = true;
+    F.wordVoiceChoice = "auto";
+    if (typeof setWordSpeechVoice === "function") setWordSpeechVoice("auto");
+    return;
+  }
+
+  let options = [{ id: "auto", label: "auto (samantha first)" }];
+  if (typeof getWordSpeechVoiceOptions === "function") {
+    const fetched = getWordSpeechVoiceOptions();
+    if (Array.isArray(fetched) && fetched.length > 0) {
+      options = fetched;
+    }
+  }
+
+  $selVoice.innerHTML = "";
+  const seen = new Set();
+  options.forEach((entry) => {
+    if (!entry || !entry.id || seen.has(entry.id)) return;
+    seen.add(entry.id);
+    const opt = document.createElement("option");
+    opt.value = entry.id;
+    opt.textContent = entry.label || entry.id;
+    $selVoice.appendChild(opt);
+  });
+
+  const selected =
+    typeof F.wordVoiceChoice === "string" && seen.has(F.wordVoiceChoice)
+      ? F.wordVoiceChoice
+      : "auto";
+  F.wordVoiceChoice = selected;
+  $selVoice.value = selected;
+  $selVoice.disabled = false;
+  if (typeof setWordSpeechVoice === "function") setWordSpeechVoice(selected);
+}
+
 $btnSettings.addEventListener("click", (e) => {
+  if (S.started) return;
   e.stopPropagation();
   const open = $settingsPanel.classList.toggle("open");
   $btnSettings.classList.toggle("open", open);
@@ -207,6 +259,7 @@ $settingsPanel.addEventListener("click", (e) => e.stopPropagation());
 
 document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
+    if (S.started) return;
     document
       .querySelectorAll("#sp-display .spanel-btn")
       .forEach((b) => b.classList.remove("active"));
@@ -220,6 +273,7 @@ document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
 
 document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
+    if (S.started) return;
     document
       .querySelectorAll("#sp-jump .spanel-btn")
       .forEach((b) => b.classList.remove("active"));
@@ -231,6 +285,7 @@ document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
 });
 
 $btnSound.addEventListener("click", () => {
+  if (S.started) return;
   F.soundKeys = !F.soundKeys;
   savePrefs();
   $btnSound.textContent = F.soundKeys ? "on" : "off";
@@ -241,11 +296,61 @@ $btnSound.addEventListener("click", () => {
 
 if ($btnSoundFx) {
   $btnSoundFx.addEventListener("click", () => {
+    if (S.started) return;
     F.soundFx = !F.soundFx;
     savePrefs();
     $btnSoundFx.textContent = F.soundFx ? "on" : "off";
     $btnSoundFx.classList.toggle("active", F.soundFx);
     if (F.soundFx) playFeedback(SND.feedback.correct, 0.6);
+    closeSettingsPanel();
+  });
+}
+
+if ($btnVoice) {
+  $btnVoice.addEventListener("click", () => {
+    if (S.started) return;
+    if (
+      typeof isWordSpeechAvailable === "function" &&
+      !isWordSpeechAvailable()
+    ) {
+      showQuickTip($btnVoice, "speech synthesis unavailable", 2000);
+      return;
+    }
+    F.wordVoice = !F.wordVoice;
+    savePrefs();
+    $btnVoice.textContent = F.wordVoice ? "on" : "off";
+    $btnVoice.classList.toggle("active", F.wordVoice);
+    if (F.wordVoice && typeof setWordSpeechVoice === "function") {
+      setWordSpeechVoice(F.wordVoiceChoice || "auto");
+    }
+    if (F.wordVoice && S.started && typeof speakWordText === "function") {
+      speakWordText(S.currentWord);
+    }
+    if (!F.wordVoice && typeof stopWordSpeech === "function") {
+      stopWordSpeech();
+    }
+    closeSettingsPanel();
+  });
+}
+
+if ($selVoice) {
+  $selVoice.addEventListener("change", () => {
+    if (S.started) return;
+    if (
+      typeof isWordSpeechAvailable === "function" &&
+      !isWordSpeechAvailable()
+    ) {
+      showQuickTip($selVoice, "speech synthesis unavailable", 2000);
+      return;
+    }
+    F.wordVoiceChoice = $selVoice.value || "auto";
+    if (typeof setWordSpeechVoice === "function") {
+      setWordSpeechVoice(F.wordVoiceChoice);
+    }
+    savePrefs();
+    if (F.wordVoice && S.started && typeof speakWordText === "function") {
+      speakWordText(S.currentWord);
+    }
     closeSettingsPanel();
   });
 }
@@ -265,6 +370,7 @@ function showQuickTip(target, text, ms = 1800) {
 
 if ($btnSoundTest) {
   $btnSoundTest.addEventListener("click", async () => {
+    if (S.started) return;
     if (!F.soundFx) {
       showQuickTip($btnSoundTest, "effects are off", 1600);
       return;
@@ -288,6 +394,7 @@ if ($btnSoundTest) {
 }
 
 $btnTheme.addEventListener("click", () => {
+  if (S.started) return;
   F.light = !F.light;
   savePrefs();
   document.body.classList.toggle("light", F.light);
@@ -327,6 +434,9 @@ function loadPrefs() {
     F.soundFx = saved.sound;
   }
 
+  if ("wordVoice" in saved) F.wordVoice = saved.wordVoice;
+  if ("wordVoiceChoice" in saved) F.wordVoiceChoice = saved.wordVoiceChoice;
+
   ["tg-row", "tg-len"].forEach((id) => {
     const key = id === "tg-row" ? "row" : "len";
     const apply = id === "tg-row" ? applyRow : applyLen;
@@ -351,6 +461,11 @@ function loadPrefs() {
   if ($btnSoundFx) {
     $btnSoundFx.textContent = F.soundFx ? "on" : "off";
     $btnSoundFx.classList.toggle("active", F.soundFx);
+  }
+
+  if ($btnVoice) {
+    $btnVoice.textContent = F.wordVoice ? "on" : "off";
+    $btnVoice.classList.toggle("active", F.wordVoice);
   }
 
   document.body.classList.toggle("light", F.light);
@@ -395,6 +510,8 @@ document.addEventListener("mouseout", (e) => {
 // ══════════════════════════════════════════════════════════════════════
 
 loadPrefs();
+refreshVoiceSelector();
+window.addEventListener("wordvoicesupdated", refreshVoiceSelector);
 const $initialHintKey = $hint.querySelector(".hint-key");
 if ($initialHintKey && typeof START_KEY_LABEL === "string") {
   $initialHintKey.textContent = START_KEY_LABEL;

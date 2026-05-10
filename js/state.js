@@ -12,6 +12,8 @@ const F = {
   jump: false, // auto-advance on complete without space
   soundKeys: true,
   soundFx: true,
+  wordVoice: false,
+  wordVoiceChoice: "auto",
   light: false,
 };
 
@@ -57,7 +59,7 @@ const CTX_SIZE = 60;
 const PARA_SIZE = 30;
 
 function getParaSize() {
-  return F.len === "long" ? 20 : PARA_SIZE;
+  return F.len === "long" ? 30 : PARA_SIZE;
 }
 
 let CTX = { buf: [], cur: 0, paraStart: 0 };

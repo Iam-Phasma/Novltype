@@ -204,7 +204,8 @@ body {
 }
 
 .toolbar-locked .tool-btn,
-.toolbar-locked .tool-sep {
+.toolbar-locked .tool-sep,
+.toolbar-locked .tool-wrap {
   opacity: 0.3;
   pointer-events: none;
 }
@@ -325,11 +326,6 @@ body {
 .tool-opt.active {
   background: var(--border);
   color: var(--text);
-}
-
-.toolbar-locked .tool-trigger {
-  opacity: 0.3;
-  pointer-events: none;
 }
 
 /* ── Stage ───────────────────────────────────────────────────── */
@@ -748,6 +744,11 @@ body.light .tip {
   background: var(--surface);
 }
 
+.settings-btn.settings-locked {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .settings-panel {
   position: absolute;
   bottom: 72px;
@@ -843,6 +844,21 @@ body.light .tip {
 .spanel-toggle.active {
   background: var(--border);
   color: var(--text);
+}
+
+.spanel-select {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 24px 3px 8px;
+  min-width: 164px;
+}
+
+.spanel-select:disabled {
+  opacity: 0.55;
 }
 
 /* ── Paragraph display mode ──────────────────────────────────── */

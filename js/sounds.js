@@ -185,6 +185,154 @@ function soundFor(key, phase) {
   }
 }
 
+let _ttsVoices = [];
+let _preferredTtsVoice = null;
+let _wordVoiceChoice =
+  typeof F.wordVoiceChoice === "string" ? F.wordVoiceChoice : "auto";
+
+function isWordSpeechAvailable() {
+  return (
+    typeof window.speechSynthesis !== "undefined" &&
+    typeof window.SpeechSynthesisUtterance !== "undefined"
+  );
+}
+
+function voiceOptionId(voice) {
+  return (voice && (voice.voiceURI || voice.name)) || "";
+}
+
+function pickSamanthaVoice(voices) {
+  if (!voices || voices.length === 0) return null;
+
+  const byNameEq = voices.find(
+    (v) => v.name && v.name.toLowerCase() === "samantha",
+  );
+  if (byNameEq) return byNameEq;
+
+  const byNameIncludes = voices.find(
+    (v) => v.name && v.name.toLowerCase().includes("samantha"),
+  );
+  if (byNameIncludes) return byNameIncludes;
+
+  const femaleHint =
+    /female|woman|samantha|susan|victoria|karen|moira|zira|fiona|ava/i;
+  const femaleEn = voices.find(
+    (v) => femaleHint.test(v.name || "") && /en/i.test(v.lang || ""),
+  );
+  if (femaleEn) return femaleEn;
+
+  const anyEn = voices.find((v) => /en/i.test(v.lang || ""));
+  if (anyEn) return anyEn;
+
+  return voices[0] || null;
+}
+
+function getFemaleWordVoices(voices) {
+  if (!voices || voices.length === 0) return [];
+  const femaleHint =
+    /female|woman|samantha|susan|victoria|karen|moira|zira|fiona|ava|allison|serena|veena|kathy|kendra|joanna|salli|kimberly|ivy|emma/i;
+
+  const dedup = [];
+  const seen = new Set();
+  voices.forEach((voice) => {
+    const id = voiceOptionId(voice);
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    dedup.push(voice);
+  });
+
+  const female = dedup.filter((v) => femaleHint.test(v.name || ""));
+  const femaleEn = female.filter((v) => /en/i.test(v.lang || ""));
+  if (femaleEn.length > 0) return femaleEn;
+  if (female.length > 0) return female;
+
+  const anyEn = dedup.filter((v) => /en/i.test(v.lang || ""));
+  if (anyEn.length > 0) return anyEn;
+
+  return dedup;
+}
+
+function pickWordVoice(voices, choice) {
+  if (!voices || voices.length === 0) return null;
+  if (choice && choice !== "auto") {
+    const exact = voices.find((v) => voiceOptionId(v) === choice);
+    if (exact) return exact;
+  }
+  return pickSamanthaVoice(voices);
+}
+
+function getWordSpeechVoiceOptions() {
+  const options = [{ id: "auto", label: "auto (samantha first)" }];
+  if (!isWordSpeechAvailable()) return options;
+
+  if (_ttsVoices.length === 0) {
+    _ttsVoices = window.speechSynthesis.getVoices() || [];
+    _preferredTtsVoice = pickWordVoice(_ttsVoices, _wordVoiceChoice);
+  }
+  getFemaleWordVoices(_ttsVoices).forEach((voice) => {
+    const id = voiceOptionId(voice);
+    if (!id) return;
+    options.push({
+      id,
+      label: `${voice.name || "voice"} (${voice.lang || "unknown"})`,
+    });
+  });
+  return options;
+}
+
+function setWordSpeechVoice(choice) {
+  _wordVoiceChoice = typeof choice === "string" && choice ? choice : "auto";
+  _preferredTtsVoice = pickWordVoice(_ttsVoices, _wordVoiceChoice);
+}
+
+function refreshWordVoices(announce = false) {
+  if (!isWordSpeechAvailable()) return;
+  _ttsVoices = window.speechSynthesis.getVoices() || [];
+  _preferredTtsVoice = pickWordVoice(_ttsVoices, _wordVoiceChoice);
+  if (announce) {
+    window.dispatchEvent(new CustomEvent("wordvoicesupdated"));
+  }
+}
+
+function stopWordSpeech() {
+  if (!isWordSpeechAvailable()) return;
+  window.speechSynthesis.cancel();
+}
+
+function speakWordText(text) {
+  if (!isWordSpeechAvailable() || !F.wordVoice) return;
+  const word = String(text || "").trim();
+  if (!word) return;
+
+  refreshWordVoices();
+  stopWordSpeech();
+
+  const utter = new SpeechSynthesisUtterance(word);
+  if (_preferredTtsVoice) {
+    utter.voice = _preferredTtsVoice;
+    if (_preferredTtsVoice.lang) utter.lang = _preferredTtsVoice.lang;
+  } else {
+    utter.lang = "en-US";
+  }
+  utter.rate = 0.98;
+  utter.pitch = 1.05;
+  utter.volume = 1;
+  window.speechSynthesis.speak(utter);
+}
+
+if (isWordSpeechAvailable()) {
+  refreshWordVoices(true);
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    refreshWordVoices(true);
+  });
+}
+
+window.isWordSpeechAvailable = isWordSpeechAvailable;
+window.speakWordText = speakWordText;
+window.stopWordSpeech = stopWordSpeech;
+window.getWordSpeechVoiceOptions = getWordSpeechVoiceOptions;
+window.setWordSpeechVoice = setWordSpeechVoice;
+
 async function testSoundPlayback() {
   ensureAudioUnlocked();
   const probe = SND.feedback.wrong.cloneNode();

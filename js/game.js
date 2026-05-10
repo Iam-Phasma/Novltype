@@ -155,6 +155,13 @@ function lockToolbar() {
     .getElementById("tg-row")
     .closest("nav")
     .classList.add("toolbar-locked");
+  const settingsBtn = document.getElementById("btn-settings");
+  const settingsPanel = document.getElementById("settings-panel");
+  if (settingsPanel) settingsPanel.classList.remove("open");
+  if (settingsBtn) {
+    settingsBtn.classList.remove("open");
+    settingsBtn.classList.add("settings-locked");
+  }
   LOCKABLE_SPANEL.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.closest(".spanel-row").classList.add("spanel-locked");
@@ -166,6 +173,8 @@ function unlockToolbar() {
     .getElementById("tg-row")
     .closest("nav")
     .classList.remove("toolbar-locked");
+  const settingsBtn = document.getElementById("btn-settings");
+  if (settingsBtn) settingsBtn.classList.remove("settings-locked");
   LOCKABLE_SPANEL.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.closest(".spanel-row").classList.remove("spanel-locked");
@@ -189,12 +198,14 @@ function loadNextWord() {
   S.typed = "";
   $typer.value = "";
   renderWord();
+  if (typeof speakWordText === "function") speakWordText(S.currentWord);
 }
 
 function reset() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
   stopResultPromptCycle();
+  if (typeof stopWordSpeech === "function") stopWordSpeech();
   setPrestartLayout(true);
   setStatsBarVisible(false);
   Object.assign(S, {
@@ -240,6 +251,7 @@ function endGame() {
   clearInterval(S.timerID);
   clearReadySequenceTimers();
   stopResultPromptCycle();
+  if (typeof stopWordSpeech === "function") stopWordSpeech();
   setPrestartLayout(false);
   setStatsBarVisible(true);
   S.started = false;
@@ -285,6 +297,8 @@ function start() {
   setTimeout(() => {
     $hint.classList.remove("exiting");
     if (S.ended) reset();
+    // reset() enables prestart layout, so force gameplay layout before run.
+    setPrestartLayout(false);
     S.started = true;
     const DURATIONS = {
       "30s": 30000,
