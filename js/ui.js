@@ -77,7 +77,10 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   if (IGNORE_KEYS.includes(e.key)) return;
   soundFor(e.key, "release");
-  if (!S.started && e.key === "Enter") start();
+  if (!S.started && e.key === "Enter") {
+    closeSettingsPanel();
+    start();
+  }
 });
 
 $typer.addEventListener("input", () => {
@@ -185,6 +188,11 @@ function applyTimedMode(val) {
   applyTime(val);
 }
 
+function closeSettingsPanel() {
+  $settingsPanel.classList.remove("open");
+  $btnSettings.classList.remove("open");
+}
+
 $btnSettings.addEventListener("click", (e) => {
   e.stopPropagation();
   const open = $settingsPanel.classList.toggle("open");
@@ -192,8 +200,7 @@ $btnSettings.addEventListener("click", (e) => {
 });
 
 document.addEventListener("click", () => {
-  $settingsPanel.classList.remove("open");
-  $btnSettings.classList.remove("open");
+  closeSettingsPanel();
 });
 
 $settingsPanel.addEventListener("click", (e) => e.stopPropagation());
@@ -207,6 +214,7 @@ document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
     F.display = btn.dataset.val;
     savePrefs();
     if (S.started || S.ended) reset();
+    closeSettingsPanel();
   });
 });
 
@@ -218,6 +226,7 @@ document.querySelectorAll("#sp-jump .spanel-btn").forEach((btn) => {
     btn.classList.add("active");
     F.jump = btn.dataset.val === "on";
     savePrefs();
+    closeSettingsPanel();
   });
 });
 
@@ -227,6 +236,7 @@ $btnSound.addEventListener("click", () => {
   $btnSound.textContent = F.soundKeys ? "on" : "off";
   $btnSound.classList.toggle("active", F.soundKeys);
   if (F.soundKeys) play(SND.press.enter, 1.4);
+  closeSettingsPanel();
 });
 
 if ($btnSoundFx) {
@@ -236,6 +246,7 @@ if ($btnSoundFx) {
     $btnSoundFx.textContent = F.soundFx ? "on" : "off";
     $btnSoundFx.classList.toggle("active", F.soundFx);
     if (F.soundFx) playFeedback(SND.feedback.correct, 0.6);
+    closeSettingsPanel();
   });
 }
 
@@ -282,6 +293,7 @@ $btnTheme.addEventListener("click", () => {
   document.body.classList.toggle("light", F.light);
   $btnTheme.textContent = F.light ? "dark" : "light";
   $btnTheme.classList.toggle("active", F.light);
+  closeSettingsPanel();
 });
 
 // ══════════════════════════════════════════════════════════════════════
