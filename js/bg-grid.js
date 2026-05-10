@@ -75,6 +75,8 @@
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-CELL, 0);
     isLight = document.body.classList.contains("light");
 
     const lineColor = isLight ? "rgba(0,0,0,0.045)" : "rgba(255,255,255,0.045)";
@@ -223,6 +225,7 @@
       }
     }
 
+    ctx.restore();
     requestAnimationFrame(draw);
   }
 
