@@ -9,15 +9,11 @@ A minimal, keyboard-first typing trainer built with vanilla HTML, CSS, and JavaS
 - **Three display modes** — single word, scrolling paragraph, or rising words
 - **Keyboard row practice** — filter words to top, home, or bottom rows
 - **Word length filter** — short (3–4), medium (5–7), or long (8–14 letters)
-- **Timed mode** — 60-second sprint with live WPM countdown
+- **Timed mode** — 30/60sec,2/3/5min sprint
 - **Jump mode** — auto-advances the moment you finish typing a word
 - **Live stats** — time, WPM, accuracy, and word count updated in real time
 - **NovelKeys Cream sounds** — satisfying mechanical click on every keystroke via Web Audio API
-- **Google 10 000 word pool** — fetched async at load; falls back to a local list offline
-- **Persistent preferences** — all settings saved to `localStorage`
 - **Dark / light theme** — defaults to system preference, manually toggleable
-- **Tooltips** — hover any control for a short description
-- **Desktop only** — a graceful overlay blocks the app on small screens
 
 ---
 
