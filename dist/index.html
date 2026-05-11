@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Novltype</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon-JZ9ZXlKZ.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="module" crossorigin src="/assets/index-CrQh9ZYU.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-mf1OTG28.css">
+  </head>
+  <body>
+    <!-- Ambient background: interactive grid -->
+    <div class="bg-orbs" id="bg-orbs">
+      <canvas id="bg-grid"></canvas>
+    </div>
+
+    <div class="mobile-block" id="mobile-block">
+      <a class="wordmark" href="https://github.com/Iam-Phasma/Novltype" target="_blank" rel="noopener noreferrer">Novltype<span class="dot">.</span></a>
+        Built for the full keyboard experience.<br />Open on a desktop to start
+        typing.
+      </p>
+    </div>
+
+    <div id="app" class="prestart">
+      <!-- Top bar: wordmark + toolbar -->
+      <div class="topbar">
+        <a class="wordmark" href="https://github.com/Iam-Phasma/Novltype" target="_blank" rel="noopener noreferrer">Novltype<span class="dot">.</span></a>
+
+        <nav class="toolbar">
+          <!-- Key row practice -->
+          <div class="tool-wrap" id="tg-row">
+            <button
+              class="tool-trigger"
+              id="row-trigger"
+              data-tip="Filter words by keyboard row"
+            >
+              Keys | all
+            </button>
+            <div class="tool-dropdown">
+              <div class="tool-dropdown-inner">
+                <button class="tool-opt active" data-val="all">all</button>
+                <button class="tool-opt" data-val="top">top row</button>
+                <button class="tool-opt" data-val="home">home row</button>
+                <button class="tool-opt" data-val="bottom">bot row</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Word length -->
+          <div class="tool-wrap" id="tg-len">
+            <button
+              class="tool-trigger"
+              id="len-trigger"
+              data-tip="Filter words by length"
+            >
+              Length | all
+            </button>
+            <div class="tool-dropdown">
+              <div class="tool-dropdown-inner">
+                <button class="tool-opt active" data-val="all">all</button>
+                <button class="tool-opt" data-val="short">short</button>
+                <button class="tool-opt" data-val="medium">medium</button>
+                <button class="tool-opt" data-val="long">long</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timed mode -->
+          <div class="tool-wrap" id="tg-time">
+            <button
+              class="tool-trigger"
+              id="time-trigger"
+              data-tip="Set a timed challenge"
+            >
+              Time | free
+            </button>
+            <div class="tool-dropdown">
+              <div class="tool-dropdown-inner">
+                <button class="tool-opt active" data-val="off">free</button>
+                <button class="tool-opt" data-val="30s">30 sec</button>
+                <button class="tool-opt" data-val="1min">1 min</button>
+                <button class="tool-opt" data-val="2min">2 min</button>
+                <button class="tool-opt" data-val="3min">3 min</button>
+                <button class="tool-opt" data-val="5min">5 min</button>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <!-- Main typing area -->
+      <main class="stage">
+        <div class="word-display" id="word-display"></div>
+        <div class="hint" id="hint">
+          press <span class="hint-key">enter</span> to start
+        </div>
+        <input
+          id="typer"
+          class="typer"
+          type="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </main>
+
+      <!-- Stats bar -->
+      <footer class="stats-bar hidden">
+        <div class="stat">
+          <span class="stat-val" id="stat-time">0:00</span>
+          <span class="stat-label">time</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-wpm">—</span>
+          <span class="stat-label">wpm</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-acc">—</span>
+          <span class="stat-label">acc</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-words">0</span>
+          <span class="stat-label">words</span>
+        </div>
+      </footer>
+
+      <div class="esc-hint" id="esc-hint">press <kbd>esc</kbd> to stop</div>
+
+      <!-- Settings panel -->
+      <div class="settings-btn" id="btn-settings" title="Settings">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
+      </div>
+
+      <div class="settings-panel" id="settings-panel">
+        <div class="spanel-row">
+          <span class="spanel-label">display</span>
+          <div class="spanel-group" id="sp-display">
+            <button
+              class="spanel-btn"
+              data-val="word"
+              data-tip="One word at a time"
+            >
+              1 word
+            </button>
+            <button
+              class="spanel-btn"
+              data-val="paragraph"
+              data-tip="Full paragraph — flip page every 30 words"
+            >
+              paragraph
+            </button>
+            <button
+              class="spanel-btn active"
+              data-val="rise"
+              data-tip="Words rise up as you type through them"
+            >
+              rise
+            </button>
+          </div>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">mode</span>
+          <div class="spanel-group" id="sp-jump">
+            <button
+              class="spanel-btn active"
+              data-val="off"
+              data-tip="Submit words with Space"
+            >
+              type
+            </button>
+            <button
+              class="spanel-btn"
+              data-val="on"
+              data-tip="Auto-advance when the full word is typed"
+            >
+              jump
+            </button>
+          </div>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">strict key</span>
+          <div class="spanel-group" id="sp-strict">
+            <button
+              class="spanel-toggle"
+              id="btn-strict-key"
+              data-tip="Require the exact next letter before progressing"
+            >
+              off
+            </button>
+          </div>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">keys</span>
+          <div class="spanel-group">
+            <button
+              class="spanel-toggle active"
+              id="btn-sound"
+              data-tip="Toggle key press/release sounds"
+            >
+              on
+            </button>
+          </div>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">effects</span>
+          <div class="spanel-group">
+            <button
+              class="spanel-toggle active"
+              id="btn-sound-fx"
+              data-tip="Toggle correct/wrong feedback sounds"
+            >
+              on
+            </button>
+            <button
+              class="spanel-toggle"
+              id="btn-sound-test"
+              data-tip="Play effects test sound"
+            >
+              test
+            </button>
+          </div>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">voice</span>
+          <button
+            class="spanel-toggle"
+            id="btn-voice"
+            data-tip="Speak each word aloud using your system's text-to-speech"
+          >
+            off
+          </button>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">speaker</span>
+          <select
+            id="sel-voice"
+            class="spanel-select"
+            title="Voice speaker"
+            aria-label="Voice speaker"
+            data-tip="Pick a voice — options depend on your OS and installed voices"
+          >
+            <option value="zira">Zira</option>
+          </select>
+        </div>
+        <div class="spanel-row">
+          <span class="spanel-label">theme</span>
+          <button
+            class="spanel-toggle"
+            id="btn-theme"
+            data-tip="Switch between dark and light mode"
+          >
+            light
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip" id="tip"></div>
+  </body>
+</html>
