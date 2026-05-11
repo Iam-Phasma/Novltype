@@ -19,7 +19,7 @@ import {
   $escHint,
   $bgOrbs,
   $tip,
-} from "./dom.js";
+} from "./dom.ts";
 import {
   start,
   endGame,

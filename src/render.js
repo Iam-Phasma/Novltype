@@ -1,5 +1,5 @@
 import { F, S, CTX, ensureParaBuf, getParaSize } from "./state.js";
-import { $display } from "./dom.js";
+import { $display } from "./dom.ts";
 
 // ══════════════════════════════════════════════════════════════════════
 //  RENDER  — word, paragraph, rise display modes
