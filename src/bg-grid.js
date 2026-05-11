@@ -70,8 +70,8 @@
     isLight = document.body.classList.contains("light");
 
     const lineColor = isLight
-      ? "rgba(0,0,0,0.045)"
-      : "rgba(255,255,255,0.045)";
+      ? "rgba(0,0,0,0.09)"
+      : "rgba(255,255,255,0.09)";
     const blockR = 107;
     const blockG = 107;
     const blockB = 255;
@@ -153,8 +153,8 @@
 
     if (mouseX > -9000) {
       const LINE_RADIUS = 4.0;
-      const LINE_PEAK = isLight ? 0.55 : 0.5;
-      const LINE_BASE = 0.045;
+      const LINE_PEAK = isLight ? 0.62 : 0.58;
+      const LINE_BASE = isLight ? 0.08 : 0.07;
       const lr = 107;
       const lg = 107;
       const lb = 255;
