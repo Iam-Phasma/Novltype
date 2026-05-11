@@ -37,6 +37,7 @@ export const SND = {
 
 export const _actx = new (window.AudioContext || window.webkitAudioContext)();
 const _decodeCache = new Map();
+const _decodeInFlight = new Map();
 let _duckKeysUntil = 0;
 const KEY_GAIN = {
   special: 3.0,
@@ -66,8 +67,62 @@ export function ensureAudioUnlocked() {
   _actx.resume().catch(() => {});
 }
 
+function decodeToCache(audio) {
+  if (!audio) return Promise.resolve(null);
+  const url = audio.src;
+  if (!url) return Promise.resolve(null);
+  if (_decodeCache.has(url)) return Promise.resolve(_decodeCache.get(url));
+  if (_decodeInFlight.has(url)) return _decodeInFlight.get(url);
+
+  const p = fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error("audio fetch failed");
+      return r.arrayBuffer();
+    })
+    .then((buf) => _actx.decodeAudioData(buf))
+    .then((decoded) => {
+      _decodeCache.set(url, decoded);
+      _decodeInFlight.delete(url);
+      return decoded;
+    })
+    .catch(() => {
+      _decodeInFlight.delete(url);
+      return null;
+    });
+
+  _decodeInFlight.set(url, p);
+  return p;
+}
+
 ["pointerdown", "keydown", "touchstart"].forEach((evt) => {
   document.addEventListener(evt, ensureAudioUnlocked, { passive: true });
+});
+
+let _prewarmed = false;
+function prewarmKeyBuffers() {
+  if (_prewarmed) return;
+  _prewarmed = true;
+  [
+    ...SND.press.generic,
+    SND.press.space,
+    SND.press.enter,
+    SND.press.backspace,
+    SND.release.generic,
+    SND.release.space,
+    SND.release.enter,
+    SND.release.backspace,
+  ].forEach((a) => decodeToCache(a));
+}
+
+["pointerdown", "keydown", "touchstart"].forEach((evt) => {
+  document.addEventListener(
+    evt,
+    () => {
+      ensureAudioUnlocked();
+      prewarmKeyBuffers();
+    },
+    { once: true, passive: true },
+  );
 });
 
 export function playWithGain(audio, gain, channel = "keys") {
@@ -95,21 +150,12 @@ export function playWithGain(audio, gain, channel = "keys") {
     doPlay(_decodeCache.get(url));
     return;
   }
-  fetch(url)
-    .then((r) => {
-      if (!r.ok) throw new Error("audio fetch failed");
-      return r.arrayBuffer();
-    })
-    .then((buf) => _actx.decodeAudioData(buf))
-    .then((decoded) => {
-      _decodeCache.set(url, decoded);
-      doPlay(decoded);
-    })
-    .catch(() => {
-      const c = audio.cloneNode();
-      c.volume = Math.min(1, gain);
-      c.play().catch(() => {});
-    });
+
+  // First hit should feel instant; decode in background for next hits.
+  const c = audio.cloneNode();
+  c.volume = Math.min(1, gain);
+  c.play().catch(() => {});
+  decodeToCache(audio);
 }
 
 export function play(audio, gain = 1, channel = "keys") {
