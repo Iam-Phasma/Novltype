@@ -4,7 +4,7 @@ import { F } from "./state.js";
 //  NOVELKEYS CREAM SOUNDS
 // ══════════════════════════════════════════════════════════════════════
 
-const SND_ROOT = "sounds/cream";
+const SND_ROOT = `${import.meta.env.BASE_URL}sounds/cream`;
 const GENERIC_N = 5;
 let genericIdx = 0;
 
@@ -30,8 +30,8 @@ export const SND = {
     backspace: _audio(`${SND_ROOT}/release/BACKSPACE.mp3`),
   },
   feedback: {
-    correct: _audio("sounds/correct.wav"),
-    wrong: _audio("sounds/beep.wav"),
+    correct: _audio(`${import.meta.env.BASE_URL}sounds/correct.wav`),
+    wrong: _audio(`${import.meta.env.BASE_URL}sounds/beep.wav`),
   },
 };
 
