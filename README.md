@@ -2,7 +2,8 @@
 
 Novltype is a minimal, keyboard-first typing trainer focused on clean visuals, responsive input, and mechanical-style key audio.
 
-Open: https://iam-phasma.github.io/Novltype/
+Vercel: https://novltype.vercel.app/ \
+Pages: https://iam-phasma.github.io/Novltype/
 
 ## Deployment
 
