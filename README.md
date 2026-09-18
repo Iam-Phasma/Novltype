@@ -4,6 +4,25 @@ Novltype is a minimal, keyboard-first typing trainer focused on clean visuals, r
 
 Open: https://iam-phasma.github.io/Novltype/
 
+## Deployment
+
+### Vercel
+
+- This project is Vercel-ready by default.
+- Import the repository in Vercel and deploy with default settings.
+- Build command: `npm run build`
+- Output directory: `dist`
+
+### GitHub Pages (optional)
+
+- The app uses `BASE_PATH` to control the Vite base URL.
+- Vercel should use the default `/` base (no extra config required).
+- For GitHub Pages under `/Novltype/`, build with:
+
+```bash
+BASE_PATH=/Novltype/ npm run build
+```
+
 ## Features
 
 - Three display modes: single word, scrolling paragraph, and rise mode

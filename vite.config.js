@@ -2,8 +2,11 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+const basePath = process.env.BASE_PATH || "/";
+const normalizedBasePath = basePath.endsWith("/") ? basePath : `${basePath}/`;
+
 export default defineConfig({
-  base: "/Novltype/",
+  base: normalizedBasePath,
   plugins: [
     tailwindcss(),
     VitePWA({
@@ -16,8 +19,8 @@ export default defineConfig({
         theme_color: "#111111",
         background_color: "#111111",
         display: "standalone",
-        scope: "/Novltype/",
-        start_url: "/Novltype/",
+        scope: normalizedBasePath,
+        start_url: normalizedBasePath,
         icons: [
           {
             src: "icons/pwa-192x192.png",
