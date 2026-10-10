@@ -37,6 +37,11 @@ Your settings are saved in your browser for your next visit.
 
 Track your typing speed in **words per minute (WPM)**, accuracy, elapsed or remaining time, and completed words during each session. Your results appear when you finish.
 
+Open **insights** beside settings for your best WPM, recent averages, and five
+latest sessions. Use the **view all** icon for the full history, word counts,
+session durations, and overall totals. History is saved only in this browser and can be cleared from
+the panel. Clearing browser site data also removes your history.
+
 ## Credits
 
 - [English word list](https://github.com/first20hours/google-10000-english-no-swears)

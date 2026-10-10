@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -40,6 +41,12 @@ export default defineConfig({
     }),
   ],
   build: {
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        insights: fileURLToPath(new URL("./insights.html", import.meta.url)),
+      },
+    },
     outDir: "dist",
     assetsDir: "assets",
   },

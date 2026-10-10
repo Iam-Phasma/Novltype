@@ -9,6 +9,9 @@ async function setup(t, preferences = {}, device = { platform: 'MacIntel', userA
     url: 'http://localhost/',
   });
   const { window } = dom;
+  // jsdom does not implement native dialog methods or browser focus trapping.
+  window.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+  window.HTMLDialogElement.prototype.close = function () { this.open = false; };
   window.innerWidth = width;
   let voices = [];
   const spoken = [];
@@ -63,6 +66,14 @@ async function setup(t, preferences = {}, device = { platform: 'MacIntel', userA
   await server.ssrLoadModule('/src/ui.js');
   return {
     ...state, game, window, spoken,
+    async loadInsightsPage() {
+      game.reset();
+      game = null;
+      const page = new JSDOM(await readFile(new URL('../insights.html', import.meta.url), 'utf8'));
+      window.document.body.innerHTML = page.window.document.body.innerHTML;
+      page.window.close();
+      await server.ssrLoadModule('/src/insights-page.js');
+    },
     get cancellations() { return cancellations; },
     el: id => window.document.getElementById(id),
     loadVoices(next) {
@@ -126,6 +137,9 @@ for (const timedMode of ['off', '30s']) {
     key('keyup', 'Enter');
     t.mock.timers.tick(280);
     assert.equal(app.S.started, true);
+    assert.ok(app.el('app').classList.contains('session-active'));
+    assert.equal(app.window.document.querySelector('.toolbar').inert, true);
+    assert.equal(app.window.document.querySelector('.panel-actions').inert, true);
     assert.equal(app.el('btn-settings').disabled, true);
     assert.equal(app.el('settings-panel').inert, true);
     assert.equal(app.window.document.activeElement, app.el('typer'));
@@ -141,6 +155,9 @@ for (const timedMode of ['off', '30s']) {
     }
     assert.equal(app.S.started, false);
     assert.equal(app.S.ended, true);
+    assert.equal(app.el('app').classList.contains('session-active'), false);
+    assert.equal(app.window.document.querySelector('.toolbar').inert, false);
+    assert.equal(app.window.document.querySelector('.panel-actions').inert, false);
     assert.equal(app.el('btn-settings').disabled, false);
     key('keydown', 'Escape');
     t.mock.timers.tick(280);
@@ -184,4 +201,99 @@ test('shrinking the window stops an active session', async t => {
   app.window.dispatchEvent(new app.window.Event('resize'));
   assert.equal(app.S.started, false);
   assert.equal(app.S.timerID, null);
+});
+
+test('completed results are saved once and insights can display them', async t => {
+  const app = await setup(t, { display: 'word', soundKeys: false, soundFx: false });
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
+  app.game.start();
+  t.mock.timers.tick(280);
+  assert.equal(app.el('btn-insights').disabled, true);
+  app.S.startTime = performance.now() - 60000;
+  app.S.typed = app.S.currentWord;
+  app.game.submitWord();
+  app.game.endGame();
+  app.game.endGame();
+  const saved = JSON.parse(app.window.localStorage.getItem('novltype_history'));
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].words, 1);
+  assert.equal(saved[0].accuracy, 100);
+  assert.equal(app.el('btn-insights').disabled, false);
+  app.el('btn-settings').click();
+  app.el('btn-insights').click();
+  assert.equal(app.el('settings-panel').classList.contains('open'), false);
+  assert.equal(app.el('insights-panel').inert, false);
+  assert.equal(app.el('insights-content').querySelectorAll('tbody tr').length, 1);
+  assert.equal(app.el('btn-history-clear'), null);
+  assert.equal(app.el('btn-insights-close'), null);
+  app.window.document.body.dispatchEvent(new app.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(app.el('insights-panel').inert, true);
+  assert.equal(app.window.document.activeElement, app.el('btn-insights'));
+
+});
+
+test('empty sessions are not added to history', async t => {
+  const app = await setup(t);
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
+  app.game.start(); t.mock.timers.tick(280); app.game.endGame();
+  assert.equal(app.window.localStorage.getItem('novltype_history'), null);
+});
+
+
+test('insights preview stays compact and the full page displays all saved details', async t => {
+  const app = await setup(t, { light: true });
+  const history = Array.from({ length: 12 }, (_, i) => ({
+    timestamp: Date.now() - i * 60000, wpm: 50 + i, accuracy: 95,
+    durationMs: 30000, words: 25, mode: '30s',
+  }));
+  app.window.localStorage.setItem('novltype_history', JSON.stringify(history));
+  app.el('btn-insights').click();
+  assert.equal(app.el('insights-content').querySelectorAll('tbody tr').length, 5);
+  assert.match(app.el('insights-view-all').getAttribute('href'), /insights.html$/);
+  await app.loadInsightsPage();
+  assert.equal(app.el('full-insights').querySelectorAll('tbody tr').length, 12);
+  assert.equal(app.el('full-insights').querySelectorAll('tbody tr')[0].cells.length, 6);
+  assert.match(app.el('full-insights').textContent, /words typed/);
+  assert.ok(app.window.document.body.classList.contains('light'));
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] });
+  app.el('clear-all-history').click();
+  assert.equal(app.el('history-confirm').open, true);
+  assert.notEqual(app.window.localStorage.getItem('novltype_history'), null);
+  app.el('history-confirm-button').click();
+  assert.notEqual(app.window.localStorage.getItem('novltype_history'), null);
+  const hold = app.el('history-hold');
+  const key = type => hold.dispatchEvent(new app.window.KeyboardEvent(type, { key: ' ', bubbles: true }));
+  key('keydown'); t.mock.timers.tick(4900); key('keyup');
+  t.mock.timers.tick(5000);
+  assert.notEqual(app.window.localStorage.getItem('novltype_history'), null);
+  key('keydown'); t.mock.timers.tick(4999);
+  assert.notEqual(app.window.localStorage.getItem('novltype_history'), null);
+  t.mock.timers.tick(1);
+  assert.equal(app.window.localStorage.getItem('novltype_history'), null);
+  assert.equal(app.el('history-confirm').open, false);
+  assert.notEqual(app.window.localStorage.getItem('novltype_prefs'), null);
+  assert.match(app.el('full-insights').textContent, /fresh start/);
+  assert.equal(app.el('history-status').textContent, 'History cleared.');
+});
+
+
+test('cancelling the confirmation or leaving a pointer hold preserves history', async t => {
+  const app = await setup(t);
+  app.window.localStorage.setItem('novltype_history', JSON.stringify([
+    { timestamp: Date.now(), wpm: 40, accuracy: 90, durationMs: 30000, words: 20, mode: '30s' },
+  ]));
+  await app.loadInsightsPage();
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] });
+  app.el('clear-all-history').click();
+  app.el('history-cancel').click();
+  assert.equal(app.el('history-confirm').open, false);
+  app.el('clear-all-history').click();
+  app.el('history-confirm-button').click();
+  app.el('history-hold').dispatchEvent(new app.window.MouseEvent('pointerdown', { button: 0, bubbles: true }));
+  t.mock.timers.tick(2000);
+  app.el('history-hold').dispatchEvent(new app.window.Event('pointerleave'));
+  t.mock.timers.tick(6000);
+  assert.notEqual(app.window.localStorage.getItem('novltype_history'), null);
+  app.window.document.body.dispatchEvent(new app.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(app.el('history-confirm').open, false);
 });

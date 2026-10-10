@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111111" />
+    <title>Insights · Novltype</title>
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <main class="insights-page">
+      <header class="insights-page-header">
+        <a class="wordmark" href="%BASE_URL%">Novltype<span class="dot">.</span></a>
+        <a class="insights-back" href="%BASE_URL%">← back to typing</a>
+      </header>
+      <div class="insights-page-heading">
+        <div><h1>your insights</h1><p>Every session adds a little perspective.</p></div>
+        <button type="button" class="spanel-toggle" id="clear-all-history" hidden>clear history</button>
+      </div>
+      <p class="insights-note">Last 50 sessions · saved only in this browser. Clearing site data removes your history.</p>
+      <dialog class="history-confirm" id="history-confirm" aria-labelledby="history-confirm-title" aria-describedby="history-confirm-description">
+        <h2 id="history-confirm-title">clear your history?</h2>
+        <p id="history-confirm-description">This removes every saved session from this browser. Your settings stay saved.</p>
+        <div class="history-confirm-actions">
+          <button type="button" class="spanel-toggle" id="history-cancel">cancel</button>
+          <button type="button" class="spanel-toggle" id="history-confirm-button">confirm</button>
+          <button type="button" class="spanel-toggle history-hold" id="history-hold" hidden>hold for 5 seconds to clear</button>
+        </div>
+        <span id="history-hold-status" class="history-status-announcement" role="status"></span>
+      </dialog>
+      <div id="full-insights"></div>
+      <p id="history-status" role="status" class="insights-note"></p>
+    </main>
+    <script type="module" src="/src/insights-page.js"></script>
+  </body>
+</html>

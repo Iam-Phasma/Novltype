@@ -9,6 +9,7 @@ import {
   ensureParaBuf,
 } from "./state.js";
 import { nextWord, rebuildQueue } from "./words.js";
+import { saveSession } from "./history.js";
 import { isAccessBlocked } from "./device.js";
 import { clearWrongPops, renderWord, setAnimateRise } from "./render.js";
 import { speakWordText, stopWordSpeech, playFeedback, SND } from "./sounds.js";
@@ -189,6 +190,10 @@ export function updateStats() {
 const LOCKABLE_SPANEL = ["sp-display", "sp-jump", "sp-strict"];
 
 export function lockToolbar() {
+  $app.classList.add("session-active");
+  document.querySelector(".toolbar").inert = true;
+  document.querySelector(".panel-actions").inert = true;
+  window.dispatchEvent(new CustomEvent("sessionstart"));
   document
     .getElementById("tg-row")
     .closest("nav")
@@ -212,6 +217,10 @@ export function lockToolbar() {
 }
 
 export function unlockToolbar() {
+  $app.classList.remove("session-active");
+  document.querySelector(".toolbar").inert = false;
+  document.querySelector(".panel-actions").inert = false;
+  window.dispatchEvent(new CustomEvent("sessionstop"));
   document
     .getElementById("tg-row")
     .closest("nav")
@@ -296,6 +305,7 @@ export function reset() {
 }
 
 export function endGame() {
+  if (!S.started) return;
   clearInterval(S.timerID);
   clearReadySequenceTimers();
   stopResultPromptCycle();
@@ -329,6 +339,10 @@ export function endGame() {
       : 0;
   const acc =
     S.typedChars > 0 ? Math.round((S.correctChars / S.typedChars) * 100) : 0;
+  if (S.wordsDone > 0 && S.typedChars > 0 && elapsed > 0) {
+    saveSession({ timestamp: Date.now(), wpm, accuracy: acc,
+      durationMs: elapsed, words: S.wordsDone, mode: F.timedMode });
+  }
   $hint.innerHTML =
     `<span class="hint-stat">${wpm} wpm</span>` +
     `<span class="hint-sep">/</span>` +

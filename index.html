@@ -136,6 +136,13 @@
 
       <div class="esc-hint" id="esc-hint">press <kbd>esc</kbd> to stop</div>
 
+      <div class="panel-actions">
+        <button type="button" class="settings-btn" id="btn-insights" aria-expanded="false" aria-controls="insights-panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 19V5M4 19h16M9 15v-4M14 15V7M19 15v-6" />
+          </svg>
+          <span>insights</span>
+        </button>
       <!-- Settings panel -->
       <button type="button" class="settings-btn" id="btn-settings" aria-expanded="false" aria-controls="settings-panel">
         <svg
@@ -155,6 +162,23 @@
         </svg>
         <span>settings</span>
       </button>
+
+      </div>
+
+      <div class="settings-panel insights-panel" id="insights-panel" role="region" aria-labelledby="insights-title" inert>
+        <div class="spanel-header">
+          <h2 id="insights-title">insights</h2>
+          <div class="insights-header-actions">
+            <a class="spanel-close" id="insights-view-all" href="%BASE_URL%insights.html" aria-label="View all insights" title="View all insights">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M10 4H4v16h16v-6" /></svg>
+            </a>
+          </div>
+        </div>
+        <div id="insights-content"></div>
+        <div class="insights-footer">
+          <p>Last 50 sessions · saved only in this browser.</p>
+        </div>
+      </div>
 
       <div class="settings-panel" id="settings-panel" role="region" aria-labelledby="settings-title" inert>
         <div class="spanel-header">

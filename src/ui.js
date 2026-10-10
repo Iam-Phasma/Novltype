@@ -1,4 +1,5 @@
 import { F, S, START_KEY_LABEL } from "./state.js";
+import { closeInsights, isInsightsOpen } from "./insights.js";
 import { validatePreferences } from "./preferences.js";
 import { initDeviceAccess, isAccessBlocked } from "./device.js";
 import {
@@ -77,6 +78,10 @@ const IGNORE_KEYS = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
 
 document.addEventListener("keydown", (e) => {
   if (isAccessBlocked()) return;
+  if (isInsightsOpen()) {
+    if (e.key === "Escape") { e.preventDefault(); closeInsights(true); }
+    return;
+  }
   if (IGNORE_KEYS.includes(e.key)) return;
   if (e.key === "Escape" && $settingsPanel.classList.contains("open")) {
     e.preventDefault();
@@ -119,7 +124,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
-  if (isAccessBlocked()) return;
+  if (isAccessBlocked() || isInsightsOpen()) return;
   if (IGNORE_KEYS.includes(e.key)) return;
   soundFor(e.key, "release");
   if (e.target.closest("button, select")) return;
@@ -397,8 +402,11 @@ function refreshVoiceSelector() {
   setWordSpeechVoice(F.wordVoiceChoice);
 }
 
+window.addEventListener("insightsopen", closeSettingsPanel);
+
 $btnSettings.addEventListener("click", (e) => {
   if (S.started) return;
+  closeInsights();
   e.stopPropagation();
   const open = $settingsPanel.classList.toggle("open");
   $btnSettings.classList.toggle("open", open);
@@ -650,6 +658,7 @@ document.addEventListener("mouseout", (e) => {
 window.addEventListener("deviceaccesschange", () => {
   if (!isAccessBlocked()) return;
   closeSettingsPanel();
+  closeInsights();
   if (S.started) reset();
 });
 initDeviceAccess();
