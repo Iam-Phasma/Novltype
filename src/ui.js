@@ -1,4 +1,6 @@
 import { F, S, START_KEY_LABEL } from "./state.js";
+import { validatePreferences } from "./preferences.js";
+import { initDeviceAccess, isAccessBlocked } from "./device.js";
 import {
   $display,
   $hint,
@@ -39,6 +41,7 @@ import {
   getWordSpeechVoiceOptions,
   setWordSpeechVoice,
   speakWordText,
+  previewWordSpeechVoice,
   stopWordSpeech,
   testSoundPlayback,
 } from "./sounds.js";
@@ -73,7 +76,15 @@ function resetFromResultWithAnimation() {
 const IGNORE_KEYS = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
 
 document.addEventListener("keydown", (e) => {
+  if (isAccessBlocked()) return;
   if (IGNORE_KEYS.includes(e.key)) return;
+  if (e.key === "Escape" && $settingsPanel.classList.contains("open")) {
+    e.preventDefault();
+    closeSettingsPanel();
+    $btnSettings.focus();
+    return;
+  }
+  if (e.target.closest("button, select")) return;
   if (!e.repeat) soundFor(e.key, "press");
 
   if (e.key === "Escape") {
@@ -108,8 +119,10 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (isAccessBlocked()) return;
   if (IGNORE_KEYS.includes(e.key)) return;
   soundFor(e.key, "release");
+  if (e.target.closest("button, select")) return;
   if (!S.started && e.key === "Enter") {
     closeSettingsPanel();
     start();
@@ -315,25 +328,9 @@ function applyTimedMode(val) {
 
 function closeSettingsPanel() {
   $settingsPanel.classList.remove("open");
+  $settingsPanel.inert = true;
   $btnSettings.classList.remove("open");
-}
-
-const SETTINGS_CLOSE_DISTANCE_PX = 150;
-
-function isPointerFarFromSettings(clientX, clientY) {
-  const panelRect = $settingsPanel.getBoundingClientRect();
-  const btnRect = $btnSettings.getBoundingClientRect();
-
-  const minX = Math.min(panelRect.left, btnRect.left);
-  const maxX = Math.max(panelRect.right, btnRect.right);
-  const minY = Math.min(panelRect.top, btnRect.top);
-  const maxY = Math.max(panelRect.bottom, btnRect.bottom);
-
-  const dx =
-    clientX < minX ? minX - clientX : clientX > maxX ? clientX - maxX : 0;
-  const dy =
-    clientY < minY ? minY - clientY : clientY > maxY ? clientY - maxY : 0;
-  return Math.hypot(dx, dy) > SETTINGS_CLOSE_DISTANCE_PX;
+  $btnSettings.setAttribute("aria-expanded", "false");
 }
 
 function refreshVoiceSelector() {
@@ -349,8 +346,7 @@ function refreshVoiceSelector() {
     $selVoice.appendChild(opt);
     $selVoice.value = "auto";
     $selVoice.disabled = true;
-    F.wordVoiceChoice = "auto";
-    setWordSpeechVoice("auto");
+    setWordSpeechVoice(F.wordVoiceChoice);
     return;
   }
 
@@ -376,29 +372,29 @@ function refreshVoiceSelector() {
       ? F.wordVoiceChoice
       : "auto";
 
-  if (selected === "auto" && F.wordVoiceChoice === "zira") {
-    const ziraPrimary = options.find(
+  if (selected === "auto" && ["zira", "karen"].includes(F.wordVoiceChoice)) {
+    const preferredName = new RegExp(`^${F.wordVoiceChoice}`, "i");
+    const preferredPrimary = options.find(
       (entry) =>
         entry &&
         entry.id &&
         entry.id !== "auto" &&
-        /^zira/i.test((entry.label || "").trim()) &&
+        preferredName.test((entry.label || "").trim()) &&
         !/desktop/i.test(entry.label || ""),
     );
-    const ziraAny = options.find(
+    const preferredAny = options.find(
       (entry) =>
         entry &&
         entry.id &&
         entry.id !== "auto" &&
-        /^zira/i.test((entry.label || "").trim()),
+        preferredName.test((entry.label || "").trim()),
     );
-    selected = (ziraPrimary || ziraAny || { id: "auto" }).id;
+    selected = (preferredPrimary || preferredAny || { id: "auto" }).id;
   }
 
-  F.wordVoiceChoice = selected;
   $selVoice.value = selected;
   $selVoice.disabled = false;
-  setWordSpeechVoice(selected);
+  setWordSpeechVoice(F.wordVoiceChoice);
 }
 
 $btnSettings.addEventListener("click", (e) => {
@@ -406,6 +402,13 @@ $btnSettings.addEventListener("click", (e) => {
   e.stopPropagation();
   const open = $settingsPanel.classList.toggle("open");
   $btnSettings.classList.toggle("open", open);
+  $btnSettings.setAttribute("aria-expanded", String(open));
+  $settingsPanel.inert = !open;
+});
+
+document.getElementById("btn-settings-close").addEventListener("click", () => {
+  closeSettingsPanel();
+  $btnSettings.focus();
 });
 
 document.addEventListener("click", () => {
@@ -413,11 +416,6 @@ document.addEventListener("click", () => {
 });
 
 $settingsPanel.addEventListener("click", (e) => e.stopPropagation());
-
-document.addEventListener("mousemove", (e) => {
-  if (!$settingsPanel.classList.contains("open")) return;
-  if (isPointerFarFromSettings(e.clientX, e.clientY)) closeSettingsPanel();
-});
 
 document.querySelectorAll("#sp-display .spanel-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -507,9 +505,7 @@ if ($selVoice) {
     F.wordVoiceChoice = $selVoice.value || "auto";
     setWordSpeechVoice(F.wordVoiceChoice);
     savePrefs();
-    if (F.wordVoice && S.started) {
-      speakWordText(S.currentWord);
-    }
+    previewWordSpeechVoice();
   });
 }
 
@@ -572,23 +568,7 @@ function loadPrefs() {
   try {
     saved = JSON.parse(localStorage.getItem(PREF_KEY));
   } catch (_) {}
-  if (!saved) return;
-
-  ["row", "len", "timedMode", "display", "jump", "strictKey", "light"].forEach(
-    (k) => {
-      if (k in saved) F[k] = saved[k];
-    },
-  );
-
-  if ("soundKeys" in saved) F.soundKeys = saved.soundKeys;
-  if ("soundFx" in saved) F.soundFx = saved.soundFx;
-  if (!("soundKeys" in saved) && !("soundFx" in saved) && "sound" in saved) {
-    F.soundKeys = saved.sound;
-    F.soundFx = saved.sound;
-  }
-
-  if ("wordVoice" in saved) F.wordVoice = saved.wordVoice;
-  if ("wordVoiceChoice" in saved) F.wordVoiceChoice = saved.wordVoiceChoice;
+  Object.assign(F, validatePreferences(saved));
 
   ["tg-row", "tg-len"].forEach((id) => {
     const key = id === "tg-row" ? "row" : "len";
@@ -603,7 +583,7 @@ function loadPrefs() {
   });
 
   document.querySelectorAll("#sp-jump .spanel-btn").forEach((b) => {
-    b.classList.toggle("active", b.dataset.val === (F.jump ? "on" : "type"));
+    b.classList.toggle("active", b.dataset.val === (F.jump ? "on" : "off"));
   });
 
   if ($btnStrictKey) {
@@ -667,6 +647,12 @@ document.addEventListener("mouseout", (e) => {
 //  BOOT
 // ══════════════════════════════════════════════════════════════════════
 
+window.addEventListener("deviceaccesschange", () => {
+  if (!isAccessBlocked()) return;
+  closeSettingsPanel();
+  if (S.started) reset();
+});
+initDeviceAccess();
 loadPrefs();
 refreshVoiceSelector();
 window.addEventListener("wordvoicesupdated", refreshVoiceSelector);

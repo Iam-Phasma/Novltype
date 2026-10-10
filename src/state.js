@@ -12,7 +12,7 @@ export const F = {
   soundKeys: true,
   soundFx: true,
   wordVoice: false,
-  wordVoiceChoice: "zira",
+  wordVoiceChoice: isMacLikePlatform() ? "karen" : "zira",
   light: false,
 };
 

@@ -2,12 +2,17 @@
 //  BACKGROUND GRID — interactive canvas with skyline cutout
 // ══════════════════════════════════════════════════════════════════════
 
+import { GRID_CELL, getGridClearAreas, isGridCellVisible } from "./grid-layout.js";
+
 (function initBgGrid() {
   const canvas = document.getElementById("bg-grid");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
-  const CELL = 48;
+  const CELL = GRID_CELL;
+  const protectedElements = [...document.querySelectorAll(".hint, .toolbar")];
+  const app = document.getElementById("app");
   const MOUSE_RADIUS = 3;
   const MOUSE_PEAK = 0.18;
   const FADE_SPEED = 0.08;
@@ -25,32 +30,17 @@
     buildCells();
   }
 
-  let colTopCut = [];
-  let colBotCut = [];
-  let rowLeftCut = [];
-  let rowRightCut = [];
+  let edges;
 
   function buildSkyline() {
-    colTopCut = [];
-    colBotCut = [];
-    rowLeftCut = [];
-    rowRightCut = [];
-    const baseTop = Math.round(rows * 0.3) - 1;
-    const baseBot = Math.round(rows * 0.7) - 1;
-    const baseLeft = Math.round(cols * 0.18);
-    const baseRight = Math.round(cols * 0.82);
-    for (let c = 0; c < cols; c++) {
-      colTopCut.push(baseTop + Math.floor(Math.random() * 3) - 1);
-      colBotCut.push(baseBot + Math.floor(Math.random() * 3) - 1);
-    }
-    for (let r = 0; r < rows; r++) {
-      rowLeftCut.push(baseLeft + Math.floor(Math.random() * 3) - 1);
-      rowRightCut.push(baseRight + Math.floor(Math.random() * 3) - 1);
-    }
-    colTopCut.push(colTopCut[cols - 1]);
-    colBotCut.push(colBotCut[cols - 1]);
-    rowLeftCut.push(rowLeftCut[rows - 1]);
-    rowRightCut.push(rowRightCut[rows - 1]);
+    // Keep the random steps stable between frames, always outside the clear area.
+    const offsets = length => Array.from({ length }, () => Math.floor(Math.random() * 3));
+    edges = {
+      top: offsets(cols),
+      bottom: offsets(cols),
+      left: offsets(rows),
+      right: offsets(rows),
+    };
   }
 
   function buildCells() {
@@ -72,17 +62,17 @@
     const lineColor = isLight
       ? "rgba(0,0,0,0.09)"
       : "rgba(255,255,255,0.09)";
-    const blockR = 107;
-    const blockG = 107;
+    const blockR = isLight ? 0 : 107;
+    const blockG = isLight ? 122 : 107;
     const blockB = 255;
 
+    // Measure current positions so wrapping, animations, and font loading are covered.
+    const clearAreas = getGridClearAreas(
+      protectedElements.map(element => element.getBoundingClientRect()),
+      app?.classList.contains("prestart"),
+    );
     function cellVisible(c, r) {
-      if (c < 0 || r < 0 || c >= cols || r >= rows) return true;
-      const tc = colTopCut[c];
-      const bc = colBotCut[c];
-      const lc = rowLeftCut[r];
-      const rc = rowRightCut[r];
-      return !(r >= tc && r < bc && c > lc && c < rc);
+      return clearAreas.every(area => isGridCellVisible(c, r, area, edges));
     }
 
     ctx.strokeStyle = lineColor;
@@ -141,11 +131,7 @@
       cell.alpha += diff * (diff > 0 ? 0.18 : FADE_SPEED);
       if (cell.alpha < 0.005) return;
 
-      const tc = colTopCut[cell.c] ?? 0;
-      const bc = colBotCut[cell.c] ?? rows;
-      const lc = rowLeftCut[cell.r] ?? 0;
-      const rc = rowRightCut[cell.r] ?? cols;
-      if (cell.r >= tc && cell.r < bc && cell.c > lc && cell.c < rc) return;
+      if (!cellVisible(cell.c, cell.r)) return;
 
       ctx.fillStyle = `rgba(${blockR},${blockG},${blockB},${cell.alpha})`;
       ctx.fillRect(cell.c * CELL + 1, cell.r * CELL + 1, CELL - 2, CELL - 2);
@@ -155,9 +141,9 @@
       const LINE_RADIUS = 4.0;
       const LINE_PEAK = isLight ? 0.62 : 0.58;
       const LINE_BASE = isLight ? 0.08 : 0.07;
-      const lr = 107;
-      const lg = 107;
-      const lb = 255;
+      const lr = blockR;
+      const lg = blockG;
+      const lb = blockB;
 
       const cMin = Math.max(0, Math.floor((mouseX - LINE_RADIUS * CELL) / CELL));
       const cMax = Math.min(cols, Math.ceil((mouseX + LINE_RADIUS * CELL) / CELL));
@@ -203,9 +189,9 @@
 
   window.addEventListener("resize", resize);
   window.addEventListener("mousemove", (e) => {
-    mouseX = e.clientX;
+    mouseX = e.clientX + CELL;
     mouseY = e.clientY;
-    mouseCol = Math.floor(e.clientX / CELL);
+    mouseCol = Math.floor(mouseX / CELL);
     mouseRow = Math.floor(e.clientY / CELL);
   });
   window.addEventListener("mouseleave", () => {

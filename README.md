@@ -1,49 +1,48 @@
 # Novltype
 
-Novltype is a minimal, keyboard-first typing trainer focused on clean visuals, responsive input, and mechanical-style key audio.
+A quiet place to practice typing. Novltype pairs a minimal interface with mechanical keyboard sounds, so you can focus on the words in front of you.
 
-Vercel: https://novltype.vercel.app/ \
-Pages: https://iam-phasma.github.io/Novltype/
+**[Start typing →](https://novltype.vercel.app/)** · [GitHub Pages](https://iam-phasma.github.io/Novltype/)
 
-## Deployment
+Use a desktop or laptop with a full keyboard for the best experience.
 
-### Vercel
+## Get started
 
-- This project is Vercel-ready by default.
-- Import the repository in Vercel and deploy with default settings.
-- Build command: `npm run build`
-- Output directory: `dist`
+1. Choose your keyboard row, word length, and session time.
+2. Open **settings** to pick a display mode, typing mode, theme, and sounds.
+3. Press **Enter** (or **Return** on Mac) to start.
+4. Type each word and press **Space** to move to the next one.
+5. Press **Esc** to finish and see your speed and accuracy.
 
-### GitHub Pages (optional)
+After a session, press **Enter / Return** to play again or **Esc** to return to the start screen. Timed sessions finish automatically when time runs out.
 
-- The app uses `BASE_PATH` to control the Vite base URL.
-- Vercel should use the default `/` base (no extra config required).
-- For GitHub Pages under `/Novltype/`, build with:
+## Find your rhythm
 
-```bash
-BASE_PATH=/Novltype/ npm run build
-```
+- **One word:** focus on a single word at a time.
+- **Paragraph:** practice with a page of words.
+- **Rise:** words move upward as you type through them.
+- **Type mode:** advance with Space.
+- **Jump mode:** advance automatically after typing the word.
+- **Strict key:** require the correct next letter before progressing.
 
-## Features
+Practice freely or choose a **30-second, 1-, 2-, 3-, or 5-minute** session. Filter words by keyboard row or length to work on the keys and words you find challenging.
 
-- Three display modes: single word, scrolling paragraph, and rise mode
-- Practice filters by keyboard row and word length
-- Timed sessions: free, 30s, 1m, 2m, 3m, 5m
-- Jump mode and strict key mode
-- Live metrics for time, WPM, accuracy, and words
-- Theme toggle with system preference support
-- Key press and release sounds with low-latency warmup
-- Progressive Web App support with install prompt capability
+## Make it yours
+
+Choose a light or dark theme, turn keyboard and feedback sounds on or off, or enable spoken words. Selecting a speaker says **“welcome”** so you can preview the voice. Available voices depend on your browser and installed system voices.
+
+Your settings are saved in your browser for your next visit.
+
+## See your progress
+
+Track your typing speed in **words per minute (WPM)**, accuracy, elapsed or remaining time, and completed words during each session. Your results appear when you finish.
 
 ## Credits
 
-- Word pool source: google-10000-english-no-swears
-    - https://github.com/first20hours/google-10000-english-no-swears
-- Audio inspiration: tplai/kbsim
-    - https://github.com/tplai/kbsim
-- Feedback sound reference: RealKai42/qwerty-learner
-    - https://github.com/RealKai42/qwerty-learner
+- [English word list](https://github.com/first20hours/google-10000-english-no-swears)
+- [Keyboard sound inspiration — tplai/kbsim](https://github.com/tplai/kbsim)
+- [Feedback sound reference — qwerty-learner](https://github.com/RealKai42/qwerty-learner)
 
 ## License
 
-MIT
+[MIT](LICENSE)

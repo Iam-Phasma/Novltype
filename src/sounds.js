@@ -1,4 +1,4 @@
-import { F } from "./state.js";
+import { F, isMacLikePlatform } from "./state.js";
 
 // ══════════════════════════════════════════════════════════════════════
 //  NOVELKEYS CREAM SOUNDS
@@ -278,6 +278,12 @@ function shortVoiceName(voice) {
 function pickDefaultVoice(voices) {
   if (!voices || voices.length === 0) return null;
 
+  if (isMacLikePlatform()) {
+    const karen = voices.find((v) => /^karen$/i.test(v.name || "")) ||
+      voices.find((v) => /\bkaren\b/i.test(v.name || ""));
+    if (karen) return karen;
+  }
+
   const byNameEq = voices.find(
     (v) => v.name && v.name.toLowerCase() === "zira",
   );
@@ -355,6 +361,11 @@ function pickWordVoice(voices, choice) {
   if (choice && choice !== "auto") {
     const exact = voices.find((v) => voiceOptionId(v) === choice);
     if (exact) return exact;
+    if (["karen", "zira"].includes(choice)) {
+      const named = voices.find((v) => (v.name || "").toLowerCase() === choice) ||
+        voices.find((v) => (v.name || "").toLowerCase().includes(choice));
+      if (named) return named;
+    }
   }
   return pickDefaultVoice(voices);
 }
@@ -406,7 +417,16 @@ export function stopWordSpeech() {
 }
 
 export function speakWordText(text) {
-  if (!isWordSpeechAvailable() || !F.wordVoice) return;
+  if (!F.wordVoice) return;
+  speakWithSelectedVoice(text);
+}
+
+export function previewWordSpeechVoice() {
+  speakWithSelectedVoice("welcome");
+}
+
+function speakWithSelectedVoice(text) {
+  if (!isWordSpeechAvailable()) return;
   const word = String(text || "").trim();
   if (!word) return;
 

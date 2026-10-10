@@ -9,6 +9,7 @@ import {
   ensureParaBuf,
 } from "./state.js";
 import { nextWord, rebuildQueue } from "./words.js";
+import { isAccessBlocked } from "./device.js";
 import { clearWrongPops, renderWord, setAnimateRise } from "./render.js";
 import { speakWordText, stopWordSpeech, playFeedback, SND } from "./sounds.js";
 import {
@@ -194,10 +195,15 @@ export function lockToolbar() {
     .classList.add("toolbar-locked");
   const settingsBtn = document.getElementById("btn-settings");
   const settingsPanel = document.getElementById("settings-panel");
-  if (settingsPanel) settingsPanel.classList.remove("open");
+  if (settingsPanel) {
+    settingsPanel.classList.remove("open");
+    settingsPanel.inert = true;
+  }
   if (settingsBtn) {
     settingsBtn.classList.remove("open");
     settingsBtn.classList.add("settings-locked");
+    settingsBtn.disabled = true;
+    settingsBtn.setAttribute("aria-expanded", "false");
   }
   LOCKABLE_SPANEL.forEach((id) => {
     const el = document.getElementById(id);
@@ -211,7 +217,10 @@ export function unlockToolbar() {
     .closest("nav")
     .classList.remove("toolbar-locked");
   const settingsBtn = document.getElementById("btn-settings");
-  if (settingsBtn) settingsBtn.classList.remove("settings-locked");
+  if (settingsBtn) {
+    settingsBtn.classList.remove("settings-locked");
+    settingsBtn.disabled = false;
+  }
   LOCKABLE_SPANEL.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.closest(".spanel-row").classList.remove("spanel-locked");
@@ -330,12 +339,16 @@ export function endGame() {
 }
 
 export function start() {
-  if (S.started) return;
+  if (S.started || isAccessBlocked()) return;
   stopResultPromptCycle();
   setPrestartLayout(false);
   $hint.classList.add("exiting");
   setTimeout(() => {
     $hint.classList.remove("exiting");
+    if (isAccessBlocked()) {
+      setPrestartLayout(true);
+      return;
+    }
     if (S.ended) reset();
     setPrestartLayout(false);
     S.started = true;
