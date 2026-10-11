@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* Full insights slides over typing; returning reveals typing underneath. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-image-pair(root) { isolation: auto; }
+::view-transition-group(root) { animation-duration: 420ms; }
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+::view-transition-old(root) {
+  z-index: 2;
+  animation: insights-slide-down 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+::view-transition-new(root) { z-index: 1; }
+html[data-page="insights"]::view-transition-old(root) {
+  z-index: 1;
+  animation: none;
+}
+html[data-page="insights"]::view-transition-new(root) {
+  z-index: 2;
+  animation: insights-slide-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes insights-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes insights-slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 /* ── Design tokens ───────────────────────────────────────────── */
 
 @theme {

@@ -69,6 +69,11 @@ function render() {
 }
 
 initHistoryClear(render);
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || event.defaultPrevented || document.querySelector('dialog[open]')) return;
+  event.preventDefault();
+  document.querySelector('.insights-back').click();
+});
 window.addEventListener('storage', render);
 window.addEventListener('pageshow', render);
 render();
