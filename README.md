@@ -2,7 +2,7 @@
 
 A quiet place to practice typing. Novltype pairs a minimal interface with mechanical keyboard sounds, so you can focus on the words in front of you.
 
-**[Start typing →](https://novltype.vercel.app/)** · [GitHub Pages](https://iam-phasma.github.io/Novltype/)
+Start Typing: **[Novltype](https://novltype.vercel.app/)** 
 
 Use a desktop or laptop with a full keyboard for the best experience.
 
