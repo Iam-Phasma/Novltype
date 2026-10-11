@@ -1,9 +1,11 @@
 import { S } from './state.js';
 import { readHistory } from './history.js';
+import { initInsightsTransition } from './page-transition.js';
 
 const button = document.getElementById('btn-insights');
 const panel = document.getElementById('insights-panel');
 const content = document.getElementById('insights-content');
+initInsightsTransition();
 
 export function isInsightsOpen() { return panel.classList.contains('open'); }
 
