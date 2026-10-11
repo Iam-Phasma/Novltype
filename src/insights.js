@@ -10,7 +10,7 @@ initInsightsTransition();
 export function isInsightsOpen() { return panel.classList.contains('open'); }
 
 export function closeInsights(focus = false) {
-  panel.classList.remove('open');
+  panel.classList.remove('open', 'keyboard-navigation');
   panel.inert = true;
   button.classList.remove('open');
   button.setAttribute('aria-expanded', 'false');

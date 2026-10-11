@@ -75,9 +75,109 @@ function resetFromResultWithAnimation() {
 // ══════════════════════════════════════════════════════════════════════
 
 const IGNORE_KEYS = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"];
+let toolbarEnterHeld = false;
+window.addEventListener('blur', () => { toolbarEnterHeld = false; });
+
+function focusToolbar(groupId) {
+  closeSettingsPanel();
+  closeInsights();
+  document.querySelectorAll('.tool-wrap.keyboard-navigation').forEach(group => group.classList.remove('keyboard-navigation'));
+  const group = document.getElementById(groupId);
+  group.classList.add('keyboard-navigation');
+  group.querySelector('.tool-opt.active, .tool-opt').focus();
+}
+
+document.addEventListener('pointerdown', () => {
+  document.querySelectorAll('.settings-panel.keyboard-navigation').forEach(pane => {
+    pane.classList.remove('keyboard-navigation');
+  });
+  document.querySelectorAll('.tool-wrap.keyboard-navigation').forEach(group => group.classList.remove('keyboard-navigation'));
+});
 
 document.addEventListener("keydown", (e) => {
   if (isAccessBlocked()) return;
+  if (!S.started && !e.ctrlKey && !e.metaKey && !e.altKey && !e.defaultPrevented &&
+      !document.querySelector('dialog[open]') &&
+      !e.target.closest('input, textarea, select, [contenteditable="true"]')) {
+    const actions = {
+      k: () => focusToolbar('tg-row'),
+      l: () => focusToolbar('tg-len'),
+      t: () => focusToolbar('tg-time'),
+      s: () => {
+        $btnSettings.click();
+        if ($settingsPanel.classList.contains('open')) {
+          $settingsPanel.classList.add('keyboard-navigation');
+          $settingsPanel.querySelector('button').focus();
+        }
+        else $btnSettings.focus();
+      },
+      i: () => {
+        document.getElementById('btn-insights').click();
+        if (isInsightsOpen()) {
+          document.getElementById('insights-panel').classList.add('keyboard-navigation');
+          document.getElementById('insights-view-all').focus();
+        }
+        else document.getElementById('btn-insights').focus();
+      },
+    };
+    const action = actions[e.key.toLowerCase()];
+    if (action) {
+      e.preventDefault();
+      if (!e.repeat) action();
+      return;
+    }
+  }
+  const toolbarGroup = e.target.closest('.tool-wrap');
+  if (!S.started && toolbarGroup && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 'Enter') toolbarEnterHeld = true;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      toolbarGroup.classList.remove('keyboard-navigation');
+      document.activeElement.blur();
+      return;
+    }
+    if (e.key.startsWith('Arrow')) {
+      const options = [...toolbarGroup.querySelectorAll('.tool-opt')];
+      const index = options.indexOf(document.activeElement);
+      const forward = e.key === 'ArrowDown' || e.key === 'ArrowRight';
+      const next = index < 0 ? (forward ? 0 : options.length - 1) :
+        (index + (forward ? 1 : -1) + options.length) % options.length;
+      toolbarGroup.classList.add('keyboard-navigation');
+      options[next].focus();
+      e.preventDefault();
+      return;
+    }
+  }
+  if (!S.started && !e.ctrlKey && !e.metaKey && !e.altKey && !e.defaultPrevented &&
+      !document.querySelector('dialog[open]') && e.key.startsWith('Arrow') &&
+      !e.target.closest('input, textarea, [contenteditable="true"]') &&
+      !(e.target.closest('select') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight'))) {
+    const pane = isInsightsOpen() ? document.getElementById('insights-panel') :
+      $settingsPanel.classList.contains('open') ? $settingsPanel : null;
+    if (pane) {
+      pane.classList.add('keyboard-navigation');
+      const controls = [...pane.querySelectorAll('button, a[href], select, summary')]
+        .filter(control => !control.disabled && !control.closest('[hidden]'));
+      const current = document.activeElement;
+      let candidates = controls;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const row = current.closest('.spanel-row');
+        if (row) candidates = controls.filter(control => row.contains(control));
+      } else {
+        candidates = controls.filter(control => {
+          const row = control.closest('.spanel-row');
+          return !row || row.querySelector('button, a[href], select') === control || control === current;
+        });
+      }
+      const index = candidates.indexOf(current);
+      const forward = e.key === 'ArrowDown' || e.key === 'ArrowRight';
+      const next = index < 0 ? (forward ? 0 : candidates.length - 1) :
+        (index + (forward ? 1 : -1) + candidates.length) % candidates.length;
+      candidates[next]?.focus();
+      e.preventDefault();
+      return;
+    }
+  }
   if (isInsightsOpen()) {
     if (e.key === "Escape") { e.preventDefault(); closeInsights(true); }
     return;
@@ -89,7 +189,7 @@ document.addEventListener("keydown", (e) => {
     $btnSettings.focus();
     return;
   }
-  if (e.target.closest("button, select")) return;
+  if (e.target.closest("button, select, a[href]")) return;
   if (!e.repeat) soundFor(e.key, "press");
 
   if (e.key === "Escape") {
@@ -124,10 +224,15 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
-  if (isAccessBlocked() || isInsightsOpen()) return;
+  if (e.key === 'Enter' && toolbarEnterHeld) {
+    toolbarEnterHeld = false;
+    e.preventDefault();
+    return;
+  }
+  if (isAccessBlocked() || isInsightsOpen() || $settingsPanel.classList.contains('open')) return;
   if (IGNORE_KEYS.includes(e.key)) return;
   soundFor(e.key, "release");
-  if (e.target.closest("button, select")) return;
+  if (e.target.closest("button, select, a[href]")) return;
   if (!S.started && e.key === "Enter") {
     closeSettingsPanel();
     start();
@@ -297,7 +402,10 @@ function bindDropdown(groupId, stateKey, prefix, onApply) {
     const chosen = document.querySelector(
       `#${groupId} .tool-opt[data-val="${val}"]`,
     );
-    $trigger.textContent = `${prefix} | ${chosen ? chosen.textContent.trim() : val}`;
+    const shortcut = document.createElement('span');
+    shortcut.className = 'shortcut-letter';
+    shortcut.textContent = prefix[0];
+    $trigger.replaceChildren(shortcut, `${prefix.slice(1)} | ${chosen ? chosen.textContent.trim() : val}`);
     if (onApply) onApply(val);
   }
 
@@ -305,6 +413,7 @@ function bindDropdown(groupId, stateKey, prefix, onApply) {
     btn.addEventListener("click", () => {
       if (S.started) return;
       apply(btn.dataset.val);
+      document.getElementById(groupId).classList.remove('keyboard-navigation');
       btn.blur();
     });
   });
@@ -332,7 +441,7 @@ function applyTimedMode(val) {
 }
 
 function closeSettingsPanel() {
-  $settingsPanel.classList.remove("open");
+  $settingsPanel.classList.remove("open", "keyboard-navigation");
   $settingsPanel.inert = true;
   $btnSettings.classList.remove("open");
   $btnSettings.setAttribute("aria-expanded", "false");
@@ -412,11 +521,6 @@ $btnSettings.addEventListener("click", (e) => {
   $btnSettings.classList.toggle("open", open);
   $btnSettings.setAttribute("aria-expanded", String(open));
   $settingsPanel.inert = !open;
-});
-
-document.getElementById("btn-settings-close").addEventListener("click", () => {
-  closeSettingsPanel();
-  $btnSettings.focus();
 });
 
 document.addEventListener("click", () => {

@@ -41,9 +41,10 @@
             <button
               class="tool-trigger"
               id="row-trigger"
+              aria-keyshortcuts="K"
               data-tip="Filter words by keyboard row"
             >
-              Keys | all
+              <span class="shortcut-letter">K</span>eys | all
             </button>
             <div class="tool-dropdown">
               <div class="tool-dropdown-inner">
@@ -60,9 +61,10 @@
             <button
               class="tool-trigger"
               id="len-trigger"
+              aria-keyshortcuts="L"
               data-tip="Filter words by length"
             >
-              Length | all
+              <span class="shortcut-letter">L</span>ength | all
             </button>
             <div class="tool-dropdown">
               <div class="tool-dropdown-inner">
@@ -79,9 +81,10 @@
             <button
               class="tool-trigger"
               id="time-trigger"
+              aria-keyshortcuts="T"
               data-tip="Set a timed challenge"
             >
-              Time | free
+              <span class="shortcut-letter">T</span>ime | free
             </button>
             <div class="tool-dropdown">
               <div class="tool-dropdown-inner">
@@ -141,10 +144,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M4 19V5M4 19h16M9 15v-4M14 15V7M19 15v-6" />
           </svg>
-          <span>insights</span>
+          <span><span class="shortcut-letter">I</span>nsights</span>
         </button>
       <!-- Settings panel -->
-      <button type="button" class="settings-btn" id="btn-settings" aria-expanded="false" aria-controls="settings-panel">
+      <button type="button" class="settings-btn" id="btn-settings" aria-expanded="false" aria-controls="settings-panel" aria-keyshortcuts="S" title="Settings (S)">
         <svg
           width="16"
           height="16"
@@ -160,7 +163,7 @@
             d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
           />
         </svg>
-        <span>settings</span>
+        <span><span class="shortcut-letter">S</span>ettings</span>
       </button>
 
       </div>
@@ -183,7 +186,6 @@
       <div class="settings-panel" id="settings-panel" role="region" aria-labelledby="settings-title" inert>
         <div class="spanel-header">
           <h2 id="settings-title">settings</h2>
-          <button type="button" class="spanel-close" id="btn-settings-close" aria-label="Close settings">×</button>
         </div>
         <section class="spanel-section" aria-labelledby="settings-practice">
           <h3 id="settings-practice">practice</h3>
@@ -314,6 +316,20 @@
             </button>
           </div>
         </section>
+        <details class="spanel-section shortcut-details">
+          <summary id="settings-shortcuts">keyboard shortcuts</summary>
+          <dl class="shortcut-map">
+            <div><dt><kbd>S</kbd></dt><dd>settings</dd></div>
+            <div><dt><kbd>I</kbd></dt><dd>insights</dd></div>
+            <div><dt><kbd>K</kbd></dt><dd>keys</dd></div>
+            <div><dt><kbd>L</kbd></dt><dd>length</dd></div>
+            <div><dt><kbd>T</kbd></dt><dd>time</dd></div>
+            <div><dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>move between rows</dd></div>
+            <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>move between options</dd></div>
+            <div><dt><kbd>Enter</kbd></dt><dd>activate focused control</dd></div>
+            <div><dt><kbd>Esc</kbd></dt><dd>close / return to typing</dd></div>
+          </dl>
+        </details>
       </div>
     </div>
 

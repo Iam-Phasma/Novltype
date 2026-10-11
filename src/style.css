@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+.shortcut-letter { text-decoration: underline; text-underline-offset: 3px; }
+
 /* Full insights slides over typing; returning reveals typing underneath. */
 @view-transition {
   navigation: auto;
@@ -812,6 +814,21 @@ body.access-blocked #app { display: none; }
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
+.shortcut-details summary { cursor: pointer; color: var(--text); font-family: var(--font-mono); font-size: 0.7rem; }
+.shortcut-details[open] summary { margin-bottom: 12px; }
+.tool-wrap.keyboard-navigation :is(button):focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--text);
+}
+.shortcut-map { display: grid; gap: 8px; font-size: 0.7rem; }
+.shortcut-map > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.shortcut-map dt { flex-shrink: 0; }
+.shortcut-map dd { color: var(--ui-muted); text-align: right; }
+.shortcut-map kbd { font-family: var(--font-mono); border: 1px solid var(--border); border-radius: 4px; padding: 2px 5px; color: var(--text); }
+.shortcut-note { color: var(--ui-muted); font-size: 0.68rem; line-height: 1.6; margin: 12px 0 8px; }
+#settings-shortcuts:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .spanel-section h3 {
   margin: 0 0 8px;
   font-family: var(--font-mono);
@@ -872,10 +889,16 @@ body.access-blocked #app { display: none; }
 }
 .spanel-select:disabled { opacity: 0.55; }
 .settings-btn:focus-visible,
+.settings-panel.keyboard-navigation :is(button, a, select, summary):focus,
 .settings-panel button:focus-visible,
 .spanel-select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+}
+.settings-panel.keyboard-navigation :is(button, a, select, summary):focus {
+  color: var(--text);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
 }
 @media (prefers-reduced-motion: reduce) {
   .settings-panel { transition: none; }

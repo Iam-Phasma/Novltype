@@ -170,6 +170,98 @@ for (const timedMode of ['off', '30s']) {
 }
 
 
+test('S and I open panes and arrows navigate without interrupting typing', async t => {
+  const app = await setup(t);
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
+  const key = (value, options = {}, target = app.window.document.activeElement) => {
+    const event = new app.window.KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true, ...options });
+    target.dispatchEvent(event);
+    return event;
+  };
+  key('s');
+  assert.equal(app.el('settings-panel').classList.contains('open'), true);
+  assert.equal(app.window.document.activeElement.dataset.val, 'word');
+  assert.equal(app.el('settings-panel').classList.contains('keyboard-navigation'), true);
+  key('s', { repeat: true });
+  assert.equal(app.el('settings-panel').classList.contains('open'), true);
+  key('ArrowRight');
+  assert.equal(app.window.document.activeElement.dataset.val, 'paragraph');
+  key('ArrowDown');
+  assert.equal(app.window.document.activeElement.closest('.spanel-group').id, 'sp-jump');
+  key('ArrowUp');
+  assert.equal(app.window.document.activeElement.closest('.spanel-group').id, 'sp-display');
+  // Exercise navigation with an available speaker dropdown.
+  app.el('sel-voice').disabled = false;
+  app.el('btn-voice').focus();
+  key('ArrowDown');
+  assert.equal(app.window.document.activeElement.id, 'sel-voice');
+  assert.equal(key('ArrowRight').defaultPrevented, false);
+  assert.equal(app.window.document.activeElement.id, 'sel-voice');
+  assert.equal(key('ArrowDown').defaultPrevented, true);
+  assert.equal(app.window.document.activeElement.id, 'btn-theme');
+  key('ArrowUp');
+  assert.equal(app.window.document.activeElement.id, 'sel-voice');
+  key('ArrowUp');
+  assert.equal(app.window.document.activeElement.id, 'btn-voice');
+  key('i');
+  assert.equal(app.el('insights-panel').classList.contains('open'), true);
+  assert.equal(app.el('settings-panel').classList.contains('open'), false);
+  assert.equal(app.window.document.activeElement.id, 'insights-view-all');
+  assert.equal(app.el('insights-panel').classList.contains('keyboard-navigation'), true);
+  app.window.document.body.dispatchEvent(new app.window.Event('pointerdown', { bubbles: true }));
+  assert.equal(app.el('insights-panel').classList.contains('keyboard-navigation'), false);
+  app.el('insights-view-all').dispatchEvent(new app.window.KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+  assert.equal(app.S.started, false);
+  key('Escape');
+  key('s', { ctrlKey: true });
+  assert.equal(app.el('settings-panel').classList.contains('open'), false);
+  const theme = app.F.light;
+  const sounds = app.F.soundKeys;
+  for (const value of ['m', '?', 'f']) key(value);
+  assert.equal(app.F.light, theme);
+  assert.equal(app.F.soundKeys, sounds);
+  for (const [shortcut, groupId, stateKey, value] of [
+    ['k', 'tg-row', 'row', 'top'],
+    ['l', 'tg-len', 'len', 'short'],
+    ['t', 'tg-time', 'timedMode', '30s'],
+  ]) {
+    key(shortcut);
+    const group = app.el(groupId);
+    assert.equal(app.window.document.activeElement.closest('.tool-wrap'), group);
+    assert.equal(group.classList.contains('keyboard-navigation'), true);
+    key('ArrowDown');
+    assert.equal(app.window.document.activeElement.dataset.val, value);
+    key('Enter');
+    app.window.document.activeElement.click();
+    // Enter activates the button on keydown; selection blurs it before keyup.
+    const release = new app.window.KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true });
+    app.window.document.body.dispatchEvent(release);
+    assert.equal(release.defaultPrevented, true);
+    assert.equal(app.S.started, false);
+    assert.equal(app.el('hint').classList.contains('exiting'), false);
+    assert.equal(app.F[stateKey], value);
+    assert.equal(group.classList.contains('keyboard-navigation'), false);
+    key(shortcut);
+    key('Escape');
+    assert.equal(group.contains(app.window.document.activeElement), false);
+  }
+  key('s');
+  app.el('btn-theme').focus();
+  key('ArrowDown');
+  assert.equal(app.window.document.activeElement.id, 'settings-shortcuts');
+  const details = app.el('settings-shortcuts').closest('details');
+  assert.equal(details.open, false);
+  app.el('settings-shortcuts').click();
+  assert.equal(details.open, true);
+  key('Escape');
+  app.game.start();
+  t.mock.timers.tick(280);
+  assert.equal(app.S.started, true);
+  assert.equal(key('s').defaultPrevented, false);
+  assert.equal(key('ArrowRight').defaultPrevented, false);
+  assert.equal(app.el('settings-panel').classList.contains('open'), false);
+});
+
 test('wide tablet is blocked and Enter cannot start a hidden session', async t => {
   const app = await setup(t, {}, { platform: 'MacIntel', userAgent: 'Macintosh', maxTouchPoints: 5 }, 1366);
   assert.ok(app.window.document.body.classList.contains('access-blocked'));
